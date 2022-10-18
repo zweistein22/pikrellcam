@@ -322,8 +322,8 @@ flip_control_set(char *option, char *setting)
                     {{MMAL_PARAMETER_MIRROR, sizeof(MMAL_PARAMETER_MIRROR_T)},
                     MMAL_PARAM_MIRROR_NONE};
 	CameraParameter *param;
-	int             hflip = TRUE,
-	                vflip = TRUE;
+	int             hflip = FALSE,
+	                vflip = FALSE;
 	int             i;
 	MMAL_STATUS_T   status = MMAL_EINVAL;
 
@@ -438,8 +438,8 @@ static CameraParameter  camera_parameters[] =
 	{ "exposure_mode", "auto", exposure_mode_set,    &pikrellcam.exposure_mode },
 	{ "image_effect",  "none", image_effect_set,     &pikrellcam.image_effect },
 
-	{ "hflip",  "off",    flip_control_set,  &pikrellcam.hflip },
-	{ "vflip",  "off",    flip_control_set,  &pikrellcam.vflip },
+	{ "hflip",  "on",    flip_control_set,  &pikrellcam.hflip },
+	{ "vflip",  "on",    flip_control_set,  &pikrellcam.vflip },
 	{ "crop",   "0 0 65536 65536", crop_control_set,  &pikrellcam.crop },
 
 	{ "metering_mode", "average",       metering_mode_set, &pikrellcam.metering_mode },
@@ -575,7 +575,7 @@ static Config  config[] =
 	  "# This must match where PiKrellCam is installed and it is checked by\n"
 	  "# the install-pikrellcam.sh script.  This should not need to be edited.\n"
 	  "#",
-	"install_dir", "/home/pi/pikrellcam", TRUE, { .string = &pikrellcam.install_dir }, config_string_set },
+	"install_dir", "/home/andreas/pikrellcam", TRUE, { .string = &pikrellcam.install_dir }, config_string_set },
 
 	{ "# If media_dir has no leading '/' it will be a sub directory in install_dir.\n"
 	  "# Otherwise it is a full pathname to the media directory.\n"
@@ -1102,7 +1102,7 @@ static Config  config[] =
 	  "# Set to true to capture audio to add to videos.  Web page control of\n"
 	  "# the microphone toggle button sets this on/off\n"
 	  "#",
-	"audio_enable",  "false", TRUE, {.value = &pikrellcam.audio_enable }, config_value_bool_set },
+	"audio_enable",  "true", TRUE, {.value = &pikrellcam.audio_enable }, config_value_bool_set },
 
 	{ "# ALSA hardware audio input (microphone) capture device. Using the hw:N\n"
 	  "# limits rate values to what the hardware supports.  So use the plughw:N\n"
