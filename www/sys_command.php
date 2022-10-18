@@ -3,7 +3,7 @@
 ?>
 
 <?php
-$e_user = "pi";
+$e_user = "andreas";
 
 if (file_exists('user.php'))
     include 'user.php';
