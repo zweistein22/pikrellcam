@@ -322,8 +322,8 @@ flip_control_set(char *option, char *setting)
                     {{MMAL_PARAMETER_MIRROR, sizeof(MMAL_PARAMETER_MIRROR_T)},
                     MMAL_PARAM_MIRROR_NONE};
 	CameraParameter *param;
-	int             hflip = FALSE,
-	                vflip = FALSE;
+	int             hflip = TRUE,
+	                vflip = TRUE;
 	int             i;
 	MMAL_STATUS_T   status = MMAL_EINVAL;
 
