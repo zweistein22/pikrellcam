@@ -1294,10 +1294,10 @@ config_set_defaults(char *home_dir)
 	/* Make sure some motion regions exist.  These will be replaced if there
 	|  is a motion regions config file
 	*/
-	motion_command("add_region 0.042 0.159 0.224 0.756");
-	motion_command("add_region 0.266 0.159 0.233 0.756");
-	motion_command("add_region 0.500 0.150 0.233 0.750");
-	motion_command("add_region 0.734 0.156 0.224 0.753");
+	//motion_command("add_region 0.042 0.159 0.224 0.756");
+	//motion_command("add_region 0.266 0.159 0.233 0.756");
+	//motion_command("add_region 0.500 0.150 0.233 0.750");
+	motion_command("add_region 0.300 0.150 0.533 0.750");
 	motion_frame.show_preset = FALSE;
 	}
 
