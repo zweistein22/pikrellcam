@@ -11,6 +11,7 @@ Git download with:
     $ git clone https://github.com/zweistein22/pikrellcam
 	
 sudo apt-get install libasound2-dev
+
 sudo apt-get install install libmp3lame-dev
 
 cd ~/pikrellcam/src
