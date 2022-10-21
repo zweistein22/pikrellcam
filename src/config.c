@@ -1130,15 +1130,15 @@ static Config  config[] =
 	{ "# Microphone audio gain dB (0 - 30). Set using the web page audio\n"
 	  "# gain up/down control buttons.\n"
 	  "#",
-	"audio_gain_dB", "10", FALSE, {.value = &pikrellcam.audio_gain_dB}, config_value_int_set },
+	"audio_gain_dB", "8", FALSE, {.value = &pikrellcam.audio_gain_dB}, config_value_int_set },
 
 	{ "# MP3 lame encode quality for a Pi2/3, range 0 - 9.\n"
 	  "#",
-	"audio_mp3_quality_Pi2", "4", FALSE, {.value = &pikrellcam.audio_mp3_quality_Pi2}, config_value_int_set },
+	"audio_mp3_quality_Pi2", "6", FALSE, {.value = &pikrellcam.audio_mp3_quality_Pi2}, config_value_int_set },
 
 	{ "# MP3 lame encode quality for a Pi1, range 0 - 9.\n"
 	  "#",
-	"audio_mp3_quality_Pi1", "7", FALSE, {.value = &pikrellcam.audio_mp3_quality_Pi1}, config_value_int_set },
+	"audio_mp3_quality_Pi1", "2", FALSE, {.value = &pikrellcam.audio_mp3_quality_Pi1}, config_value_int_set },
 
 
 	{ "\n# ------------------- Miscellaneous Options  -----------------------\n"
