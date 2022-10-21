@@ -20,8 +20,8 @@
 //
 	define("LOG_FILE", "/tmp/pikrellcam.log");
 	define("MJPEG_FILE", "/run/pikrellcam/mjpeg.jpg");
-	define("PIKRELLCAM", "/home/pi/pikrellcam/pikrellcam");
-	define("FIFO_FILE", "/home/pi/pikrellcam/www/FIFO");
+	define("PIKRELLCAM", "/home/andreas/pikrellcam/pikrellcam");
+	define("FIFO_FILE", "/home/andreas/pikrellcam/www/FIFO");
 
 	define("SERVOS_ENABLE", "servos_off");
 
