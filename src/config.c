@@ -1130,11 +1130,11 @@ static Config  config[] =
 	{ "# Microphone audio gain dB (0 - 30). Set using the web page audio\n"
 	  "# gain up/down control buttons.\n"
 	  "#",
-	"audio_gain_dB", "0", FALSE, {.value = &pikrellcam.audio_gain_dB}, config_value_int_set },
+	"audio_gain_dB", "10", FALSE, {.value = &pikrellcam.audio_gain_dB}, config_value_int_set },
 
 	{ "# MP3 lame encode quality for a Pi2/3, range 0 - 9.\n"
 	  "#",
-	"audio_mp3_quality_Pi2", "2", FALSE, {.value = &pikrellcam.audio_mp3_quality_Pi2}, config_value_int_set },
+	"audio_mp3_quality_Pi2", "4", FALSE, {.value = &pikrellcam.audio_mp3_quality_Pi2}, config_value_int_set },
 
 	{ "# MP3 lame encode quality for a Pi1, range 0 - 9.\n"
 	  "#",
@@ -1149,11 +1149,11 @@ static Config  config[] =
 
 	{ "# Your latitude used to calculate sun rise, set, dawn, and dusk times.\n"
 	  "#",
-	"latitude",  "30.12N", FALSE, {.string = &pikrellcam.latitude },   config_string_set },
+	"latitude",  "45.12N", FALSE, {.string = &pikrellcam.latitude },   config_string_set },
 
 	{ "# Your longitude used to calculate sun rise, set, dawn, and dusk times.\n"
 	  "#",
-	"longitude", "97.88W", FALSE, {.string = &pikrellcam.longitude },   config_string_set },
+	"longitude", "9.88E", FALSE, {.string = &pikrellcam.longitude },   config_string_set },
 
 	{ "# Setting a locale to get annotated time shown in your language is\n"
 	  "# not preserved when starting pikrellcam from the web page.  Set it\n"
