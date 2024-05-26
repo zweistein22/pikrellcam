@@ -7,7 +7,7 @@ then
     echo -e "$PGM should not be run as root.\n"
     exit 1
 fi
-
+NEW_PHP_VERSION=7.4.33
 
 #!/bin/bash
 
@@ -16,12 +16,12 @@ check_php_version() {
     if command -v php > /dev/null 2>&1; then
         PHP_VERSION=$(php -v | grep -oP '^PHP \K[\d.]+')
 		echo "$PHP_VERSION found."
-        if [ "$PHP_VERSION" == "7.4" ]; then
-            echo "PHP 7.4 is already installed."
+        if [ "$PHP_VERSION" == "$NEW_PHP_VERSION" ]; then
+            echo "$NEW_PHP_VERSION is already installed."
             
         else
             echo "Different PHP version $PHP_VERSION"
-            read -p "Do you want to uninstall the current PHP version and install PHP 7.4.33? (y/n) " choice
+            read -p "Do you want to uninstall the current PHP version and install $NEW_PHP_VERSION? (y/n) " choice
             case "$choice" in 
               y|Y ) echo "Uninstalling current PHP version...";;
               n|N ) echo "keep current php $PHP_VERSION";;
@@ -29,7 +29,7 @@ check_php_version() {
             esac
         fi
     else
-        echo "PHP is not installed. Installing PHP 7.4.33..."
+        echo "PHP is not installed. Installing PHP $NEW_PHP_VERSION..."
     fi
 }
 
@@ -68,10 +68,10 @@ install_php_7_4() {
         re2c
 
     # Download PHP 7.4 source
-    PHP_VERSION=7.4.33
-    curl -O https://www.php.net/distributions/php-$PHP_VERSION.tar.gz
-    tar -xzvf php-$PHP_VERSION.tar.gz
-    cd php-$PHP_VERSION
+   
+    curl -O https://www.php.net/distributions/php-$NEW_PHP_VERSION.tar.gz
+    tar -xzvf php-$NEW_PHP_VERSION.tar.gz
+    cd php-$NEW_PHP_VERSION
 
     # Configure and install
     ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php --enable-mbstring --with-curl --with-openssl --with-zlib --with-pdo-mysql --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-mbstring --with-readline --with-zip
@@ -87,10 +87,10 @@ install_php_7_4() {
     sudo ln -s /usr/local/php/bin/php /usr/bin/php
     sudo ln -s /usr/local/php/sbin/php-fpm /usr/sbin/php-fpm
 	cd ..  # on ~/user/pikrellcam  now
-	rm -rf php-$PHP_VERSION.tar.gz
-	rm -rf php-$PHP_VERSION
+	rm -rf php-$NEW_PHP_VERSION.tar.gz
+	rm -rf php-$NEW_PHP_VERSION
 
-    echo "PHP 7.4.33 installation is complete."
+    echo "PHP $NEW_PHP_VERSION installation is complete."
 }
 
 
@@ -358,7 +358,7 @@ fi
 CMD=$PWD/pikrellcam
 if ! grep -q "$CMD" /etc/sudoers.d/pikrellcam 2>/dev/null
 then
-	echo "Adding to /etc/sudoers.d: www-data permission to run pikrellcam as user pi:"
+	echo "Adding to /etc/sudoers.d: www-data permission to run pikrellcam as user $USER:"
 	cp etc/pikrellcam.sudoers /tmp/pikrellcam.sudoers.tmp
 	sed -i "s|pikrellcam|$CMD|" /tmp/pikrellcam.sudoers.tmp
 	sed -i "s/USER/$USER/" /tmp/pikrellcam.sudoers.tmp
