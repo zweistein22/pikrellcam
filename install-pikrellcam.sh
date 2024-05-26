@@ -8,6 +8,85 @@ then
     exit 1
 fi
 
+
+#!/bin/bash
+
+# Function to check PHP version
+check_php_version() {
+    if command -v php > /dev/null 2>&1; then
+        PHP_VERSION=$(php -v | grep -oP '^PHP \K[\d.]+')
+        if [ "$PHP_VERSION" == "7.4" ]; then
+            echo "PHP 7.4 is already installed."
+            exit 0
+        else
+            echo "Different PHP version ($PHP_VERSION) is installed."
+            read -p "Do you want to uninstall the current PHP version and install PHP 7.4? (y/n) " choice
+            case "$choice" in 
+              y|Y ) echo "Uninstalling current PHP version...";;
+              n|N ) echo "Exiting script."; exit 1;;
+              * ) echo "Invalid choice. Exiting."; exit 1;;
+            esac
+        fi
+    else
+        echo "PHP is not installed. Installing PHP 7.4..."
+    fi
+}
+
+# Function to uninstall current PHP version
+uninstall_php() {
+    echo "Uninstalling current PHP version..."
+    sudo apt-get purge -y php*
+    sudo apt-get autoremove -y
+    sudo rm -rf /etc/php /usr/local/php
+}
+
+# Function to install PHP 7.4
+install_php_7_4() {
+    sudo apt update
+    sudo apt install -y \
+        autoconf \
+        bison \
+        build-essential \
+        curl \
+        libxml2-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        libcurl4-openssl-dev \
+        libjpeg-dev \
+        libpng-dev \
+        libonig-dev \
+        libreadline-dev \
+        libfreetype6-dev \
+        libzip-dev \
+        pkg-config \
+        re2c
+
+    # Download PHP 7.4 source
+    PHP_VERSION=7.4.0
+    curl -O https://www.php.net/distributions/php-$PHP_VERSION.tar.gz
+    tar -xzvf php-$PHP_VERSION.tar.gz
+    cd php-$PHP_VERSION
+
+    # Configure and install
+    ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php --enable-mbstring --with-curl --with-openssl --with-zlib --with-pdo-mysql --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-mbstring --with-readline --with-zip
+    make -j$(nproc)
+    sudo make install
+
+    # Set up PHP-FPM as a service
+    sudo cp sapi/fpm/php-fpm.service /etc/systemd/system/
+    sudo systemctl enable php-fpm
+    sudo systemctl start php-fpm
+
+    # Create symlinks for php and php-fpm
+    sudo ln -s /usr/local/php/bin/php /usr/bin/php
+    sudo ln -s /usr/local/php/sbin/php-fpm /usr/sbin/php-fpm
+
+    echo "PHP 7.4 installation is complete."
+}
+
+
+
+
 bad_install()
 	{
 	echo "Cannot find $1 in $PWD"
@@ -124,7 +203,10 @@ PACKAGE_LIST=""
 if ((DEB_VERSION >= BUSTER))
 then
 	AV_PACKAGES="ffmpeg"
-	PHP_PACKAGES="php7.4 php7.4-common php7.4-fpm"
+	PHP_PACKAGES=""
+	check_php_version
+    uninstall_php
+    install_php_7_4
 elif ((DEB_VERSION >= STRETCH))
 then
 	AV_PACKAGES="libav-tools"
