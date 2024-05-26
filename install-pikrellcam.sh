@@ -199,8 +199,11 @@ V=`cat /etc/debian_version`
 DEB_VERSION="${V%.*}"
 
 PACKAGE_LIST=""
-
-if ((DEB_VERSION >= BUSTER))
+if ((DEB_VERSION > BUSTER))
+then
+    echo "linux version not supported. (Must be BUSTER or less."
+	echo "install failed."
+elif ((DEB_VERSION >= BUSTER))
 then
     echo "BUSTER detected."
 	AV_PACKAGES="ffmpeg"
