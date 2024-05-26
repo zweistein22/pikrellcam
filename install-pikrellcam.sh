@@ -202,6 +202,7 @@ PACKAGE_LIST=""
 
 if ((DEB_VERSION >= BUSTER))
 then
+    echo "BUSTER detected."
 	AV_PACKAGES="ffmpeg"
 	PHP_PACKAGES=""
 	check_php_version
