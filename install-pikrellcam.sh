@@ -24,7 +24,7 @@ check_php_version() {
             read -p "Do you want to uninstall the current PHP version and install PHP 7.4.33? (y/n) " choice
             case "$choice" in 
               y|Y ) echo "Uninstalling current PHP version...";;
-              n|N ) echo "keep current php "$PHP_VERSION
+              n|N ) echo "keep current php $PHP_VERSION";;
               * ) echo "Invalid choice. Exiting."; exit 1;;
             esac
         fi
