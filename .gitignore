@@ -1,4 +1,6 @@
 .vs
+pikrellcam
+!pikrellcam/
 scripts
 www/.htpasswd
 www/FIFO
