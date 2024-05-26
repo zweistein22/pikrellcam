@@ -62,7 +62,7 @@ install_php_7_4() {
         re2c
 
     # Download PHP 7.4 source
-    PHP_VERSION=7.4.0
+    PHP_VERSION=7.4.33
     curl -O https://www.php.net/distributions/php-$PHP_VERSION.tar.gz
     tar -xzvf php-$PHP_VERSION.tar.gz
     cd php-$PHP_VERSION
