@@ -20,7 +20,7 @@ check_php_version() {
             echo "PHP 7.4 is already installed."
             
         else
-            echo "Different PHP version "($PHP_VERSION)
+            echo "Different PHP version $PHP_VERSION"
             read -p "Do you want to uninstall the current PHP version and install PHP 7.4.33? (y/n) " choice
             case "$choice" in 
               y|Y ) echo "Uninstalling current PHP version...";;
