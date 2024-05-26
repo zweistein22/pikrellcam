@@ -214,8 +214,9 @@ DEB_VERSION="${V%.*}"
 PACKAGE_LIST=""
 if ((DEB_VERSION > BUSTER))
 then
-    echo "linux version not supported. (Must be BUSTER or less."
-	echo "install failed."; exit 1;;
+    echo "linux version not supported. Must be BUSTER or less."
+	echo "install failed."
+	exit 1
 	AV_PACKAGES=""
 	PHP_PACKAGES=""
 elif ((DEB_VERSION >= BUSTER))
