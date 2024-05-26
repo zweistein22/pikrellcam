@@ -80,6 +80,9 @@ install_php_7_4() {
     # Create symlinks for php and php-fpm
     sudo ln -s /usr/local/php/bin/php /usr/bin/php
     sudo ln -s /usr/local/php/sbin/php-fpm /usr/sbin/php-fpm
+	cd ..  # on ~/user/pikrellcam  now
+	rm -rf php-$PHP_VERSION.tar.gz
+	rm -rf php-$PHP_VERSION
 
     echo "PHP 7.4 installation is complete."
 }

@@ -13,10 +13,15 @@ Git download with:
 	
 
 cd ~/pikrellcam/src
+
 make -j4
 
 cd ~/pikrellcam
+
 ./install-pikrellcam.sh
+
+in case of errors you can try to delete ~/.pikrellcam/pikrellcam.conf
+
 
 
 
