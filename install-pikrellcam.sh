@@ -203,6 +203,8 @@ if ((DEB_VERSION > BUSTER))
 then
     echo "linux version not supported. (Must be BUSTER or less."
 	echo "install failed."
+	AV_PACKAGES=""
+	PHP_PACKAGES=""
 elif ((DEB_VERSION >= BUSTER))
 then
     echo "BUSTER detected."
