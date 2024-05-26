@@ -38,6 +38,11 @@ uninstall_php() {
     sudo apt-get purge -y php*
     sudo apt-get autoremove -y
     sudo rm -rf /etc/php /usr/local/php
+	sudo systemctl stop php-fpm
+	sudo rm /etc/systemd/system/php-fpm.service
+    # Create symlinks for php and php-fpm
+    sudo rm /usr/bin/php
+    sudo rm /usr/sbin/php-fpm
 }
 
 # Function to install PHP 7.4
@@ -205,7 +210,7 @@ PACKAGE_LIST=""
 if ((DEB_VERSION > BUSTER))
 then
     echo "linux version not supported. (Must be BUSTER or less."
-	echo "install failed."
+	echo "install failed."; exit 1;;
 	AV_PACKAGES=""
 	PHP_PACKAGES=""
 elif ((DEB_VERSION >= BUSTER))
