@@ -18,8 +18,8 @@ check_php_version() {
             echo "$NEW_PHP_VERSION is already installed."
             read -p "reinstall? (y/n) " choice
             case "$choice" in 
-              y|Y ) return 1;
-              n|N ) return 0;
+              (y|Y ) return 1;
+              (n|N ) return 0;
               * ) echo "Invalid choice. Exiting."; exit 1;;
             esac
         else
