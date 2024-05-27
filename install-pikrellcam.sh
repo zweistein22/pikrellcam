@@ -33,7 +33,7 @@ check_php_version() {
             esac
         fi
     else
-        echo "PHP is not installed. Installing PHP $NEW_PHP_VERSION..."
+        echo "PHP is not installed. Installing PHP $NEW_PHP_VERSION...";return 1;;
     fi
 }
 
