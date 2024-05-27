@@ -10,7 +10,7 @@ fi
 NEW_PHP_VERSION=7.4.33
 
 # Function to check PHP version
-check_php_version() {
+do_new_php_install() {
     if command -v php > /dev/null 2>&1; then
         PHP_VERSION=$(php -v | grep -oP '^PHP \K[\d.]+')
 		echo "$PHP_VERSION found."
@@ -30,10 +30,9 @@ check_php_version() {
         y|Y ) echo "Uninstalling current PHP version...";return 1;;
         n|N ) echo "keep current php $PHP_VERSION";return 0;;
         * ) echo "Invalid choice. Exiting."; exit 1;;
-        esac
-        
+        esac  
     else
-        echo "PHP is not installed. Installing PHP $NEW_PHP_VERSION...";return 1;;
+        echo "PHP is not installed. Installing PHP $NEW_PHP_VERSION...";return 1;
     fi
 }
 
