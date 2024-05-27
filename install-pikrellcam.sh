@@ -25,13 +25,13 @@ check_php_version() {
         else
             echo "Different PHP version $PHP_VERSION"
 		fi
-            read -p "Do you want to uninstall the current PHP version and install $NEW_PHP_VERSION? (y/n) " choice
-            case "$choice" in 
-              y|Y ) echo "Uninstalling current PHP version...";return 1;;
-              n|N ) echo "keep current php $PHP_VERSION";return 0;;
-              * ) echo "Invalid choice. Exiting."; exit 1;;
-            esac
-        fi
+        read -p "Do you want to uninstall the current PHP version and install $NEW_PHP_VERSION? (y/n) " choice
+        case "$choice" in 
+        y|Y ) echo "Uninstalling current PHP version...";return 1;;
+        n|N ) echo "keep current php $PHP_VERSION";return 0;;
+        * ) echo "Invalid choice. Exiting."; exit 1;;
+        esac
+        
     else
         echo "PHP is not installed. Installing PHP $NEW_PHP_VERSION...";return 1;;
     fi
