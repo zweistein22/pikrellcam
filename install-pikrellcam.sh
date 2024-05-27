@@ -227,7 +227,8 @@ then
     echo "BUSTER detected."
 	AV_PACKAGES="ffmpeg"
 	PHP_PACKAGES=""
-	if do_new_php_install; then
+	if do_new_php_install; then  
+	   apt-get remove -y --purge nginx*
        uninstall_php
        install_php_7_4
 	fi
