@@ -9,8 +9,6 @@ then
 fi
 NEW_PHP_VERSION=7.4.33
 
-#!/bin/bash
-
 # Function to check PHP version
 check_php_version() {
     if command -v php > /dev/null 2>&1; then
@@ -18,13 +16,19 @@ check_php_version() {
 		echo "$PHP_VERSION found."
         if [ "$PHP_VERSION" == "$NEW_PHP_VERSION" ]; then
             echo "$NEW_PHP_VERSION is already installed."
-            
+            read -p "reinstall? (y/n) " choice
+            case "$choice" in 
+              y|Y ) ;return 1;
+              n|N ) ;return 0;
+              * ) echo "Invalid choice. Exiting."; exit 1;;
+            esac
         else
             echo "Different PHP version $PHP_VERSION"
+		fi
             read -p "Do you want to uninstall the current PHP version and install $NEW_PHP_VERSION? (y/n) " choice
             case "$choice" in 
-              y|Y ) echo "Uninstalling current PHP version...";;
-              n|N ) echo "keep current php $PHP_VERSION";;
+              y|Y ) echo "Uninstalling current PHP version...";return 1;
+              n|N ) echo "keep current php $PHP_VERSION";return 0;
               * ) echo "Invalid choice. Exiting."; exit 1;;
             esac
         fi
@@ -224,9 +228,10 @@ then
     echo "BUSTER detected."
 	AV_PACKAGES="ffmpeg"
 	PHP_PACKAGES=""
-	check_php_version
-    uninstall_php
-    install_php_7_4
+	if check_php_version; then
+       uninstall_php
+       install_php_7_4
+	fi
 elif ((DEB_VERSION >= STRETCH))
 then
 	AV_PACKAGES="libav-tools"
