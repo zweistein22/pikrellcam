@@ -44,6 +44,7 @@ uninstall_php() {
     sudo rm -rf /etc/php /usr/local/php
 	sudo systemctl stop php-fpm
 	sudo rm /etc/systemd/system/php-fpm.service
+	sudo rm /etc/systemd/system/multi-user.target.wants/php-fpm.service
     # Create symlinks for php and php-fpm
     sudo rm /usr/bin/php
     sudo rm /usr/sbin/php-fpm
