@@ -2,6 +2,10 @@
 
 PGM=`basename $0`
 
+NEW_PHP_VERSION='7.4.33'
+
+
+
 if [ `id -u` == 0 ]
 then
     echo -e "$PGM should not be run as root.\n"
