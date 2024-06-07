@@ -13,9 +13,9 @@ fi
 do_new_php_install() {
     if command -v php > /dev/null 2>&1; then
         PHP_VERSION=$(php -v | grep -oP '^PHP \K[\d.]+')
-		echo "$PHP_VERSION found."
+		echo "php $PHP_VERSION found."
         if [ "$PHP_VERSION" == "$NEW_PHP_VERSION" ]; then
-            echo "$NEW_PHP_VERSION is already installed."
+            echo "php $NEW_PHP_VERSION is already installed."
             read -p "reinstall? (y/n) " choice
             case "$choice" in 
               y|Y ) return 1;;
@@ -25,7 +25,7 @@ do_new_php_install() {
         else
             echo "Different PHP version $PHP_VERSION"
 		fi
-        read -p "Do you want to uninstall the current PHP version and install $NEW_PHP_VERSION? (y/n) " choice
+        read -p "Do you want to uninstall the current PHP version and install php $NEW_PHP_VERSION? (y/n) " choice
         case "$choice" in 
         y|Y ) echo "Uninstalling current PHP version...";return 1;;
         n|N ) echo "keep current php $PHP_VERSION";return 0;;
@@ -44,9 +44,8 @@ uninstall_php() {
     sudo rm -rf /etc/php /usr/local/php
 	sudo systemctl stop php-fpm
 	sudo rm /etc/systemd/system/php-fpm.service
-	sudo rm /etc/systemd/system/multi-user.target.wants/php-fpm.service
-	sudo rm /etc/systemd/system/multi-user.target.wants/php-fpm.service
-    # Create symlinks for php and php-fpm
+	sudo rm /etc/systemd/system/multi-user.target.wants/php*fpm.service
+	# Create symlinks for php and php-fpm
     sudo rm /usr/bin/php
     sudo rm /usr/sbin/php-fpm
 }
