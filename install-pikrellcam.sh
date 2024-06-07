@@ -14,6 +14,7 @@ do_new_php_install() {
     if command -v php > /dev/null 2>&1; then
         PHP_VERSION=$(php -v | grep -oP '^PHP \K[\d.]+')
 		echo "php $PHP_VERSION found."
+		echo "install version: $NEW_PHP_VERSION"
         if [ "$PHP_VERSION" == "$NEW_PHP_VERSION" ]; then
             echo "php $NEW_PHP_VERSION is already installed."
             read -p "reinstall? (y/n) " choice
