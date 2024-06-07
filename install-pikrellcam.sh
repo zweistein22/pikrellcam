@@ -23,8 +23,8 @@ do_new_php_install() {
             echo "php $NEW_PHP_VERSION is already installed."
             read -p "reinstall? (y/n) " choice
             case "$choice" in 
-              y|Y ) return 1;;
-              n|N ) return 0;;
+              y|Y ) return 0;;
+              n|N ) return 1;;
               * ) echo "Invalid choice. Exiting."; exit 1;;
             esac
         else
@@ -32,8 +32,8 @@ do_new_php_install() {
 		fi
         read -p "Do you want to uninstall the current PHP version and install php $NEW_PHP_VERSION? (y/n) " choice
         case "$choice" in 
-        y|Y ) echo "Uninstalling current PHP version...";return 1;;
-        n|N ) echo "keep current php $PHP_VERSION";return 0;;
+        y|Y ) echo "Uninstalling current PHP version...";return 0;;
+        n|N ) echo "keep current php $PHP_VERSION";return 1;;
         * ) echo "Invalid choice. Exiting."; exit 1;;
         esac  
     else
