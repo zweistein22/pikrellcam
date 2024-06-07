@@ -7,7 +7,7 @@ then
     echo -e "$PGM should not be run as root.\n"
     exit 1
 fi
-NEW_PHP_VERSION=7.4.33
+ 
 
 # Function to check PHP version
 do_new_php_install() {
@@ -45,6 +45,7 @@ uninstall_php() {
 	sudo systemctl stop php-fpm
 	sudo rm /etc/systemd/system/php-fpm.service
 	sudo rm /etc/systemd/system/multi-user.target.wants/php-fpm.service
+	sudo rm /etc/systemd/system/multi-user.target.wants/php-fpm.service
     # Create symlinks for php and php-fpm
     sudo rm /usr/bin/php
     sudo rm /usr/sbin/php-fpm
@@ -78,14 +79,18 @@ install_php_7_4() {
     cd php-$NEW_PHP_VERSION
 
     # Configure and install
-    ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php --enable-mbstring --with-curl --with-openssl --with-zlib --with-pdo-mysql --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-mbstring --with-readline --with-zip
+    sudo ./configure  --sysconfdir=/etc/php --with-config-file-path=/etc/php --enable-mbstring --with-curl --with-openssl --with-zlib --with-pdo-mysql --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-mbstring --with-readline --with-zip
     make -j$(nproc)
     sudo make install
 
+	 VSHORT=$NEW_PHP_VERSION
+# Strip all chars after decimal point
+    SHORT_PHP_VERSION="${VSHORT%.*}"
+	
     # Set up PHP-FPM as a service
-    sudo cp sapi/fpm/php-fpm.service /etc/systemd/system/
-    sudo systemctl enable php-fpm
-    sudo systemctl start php-fpm
+    sudo cp sapi/fpm/php-fpm.service /etc/systemd/system/php$SHORT_PHP_VERSION-fpm.service
+    sudo systemctl enable phpSHORT_PHP_VERSION-fpm
+    sudo systemctl start phpSHORT_PHP_VERSION-fpm
 
     # Create symlinks for php and php-fpm
     sudo ln -s /usr/local/php/bin/php /usr/bin/php
@@ -106,6 +111,13 @@ bad_install()
 	echo "Are you running $PGM in the install directory?"
 	exit 1
 	}
+
+
+if do_new_php_install; then  
+	   apt-get remove -y --purge nginx*
+       uninstall_php
+       install_php_7_4
+fi
 
 cd src
 make -j4
@@ -228,11 +240,7 @@ then
     echo "BUSTER detected."
 	AV_PACKAGES="ffmpeg"
 	PHP_PACKAGES=""
-	if do_new_php_install; then  
-	   apt-get remove -y --purge nginx*
-       uninstall_php
-       install_php_7_4
-	fi
+	
 elif ((DEB_VERSION >= STRETCH))
 then
 	AV_PACKAGES="libav-tools"
