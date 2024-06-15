@@ -225,19 +225,25 @@ echo "Starting PiKrellCam install..."
 JESSIE=8
 STRETCH=9
 BUSTER=10
-
+BULLS-EYE=11
 V=`cat /etc/debian_version`
 #DEB_VERSION="${V:0:1}"
 # Strip all chars after decimal point
 DEB_VERSION="${V%.*}"
 
 PACKAGE_LIST=""
-if ((DEB_VERSION > BUSTER))
+if ((DEB_VERSION > BULLS-EYE))
 then
-    echo "linux version not supported. Must be BUSTER or less."
+    echo "linux version not supported. Must be BULLS-EYE or less."
 	echo "install failed."
 	exit 1
 	AV_PACKAGES=""
+	PHP_PACKAGES=""
+
+elif ((DEB_VERSION >= BULLS-EYE))
+then
+ echo "BULLS-EYE detected."
+	AV_PACKAGES="ffmpeg"
 	PHP_PACKAGES=""
 elif ((DEB_VERSION >= BUSTER))
 then
