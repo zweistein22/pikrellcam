@@ -11,6 +11,8 @@ sudo apt-get install git
 Git download with:
     $ git clone https://github.com/zweistein22/pikrellcam
 	
+sudo apt-get install libasound2-dev alsa-base alsa-utils
+sudo apt-get install libmp3lame-dev
 
 cd ~/pikrellcam/src
 
