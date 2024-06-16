@@ -275,6 +275,7 @@ do
 	fi
 done
 
+
 if [ "$PACKAGE_LIST" != "" ]
 then
 	echo "Installing packages: $PACKAGE_LIST"
