@@ -123,9 +123,6 @@ if do_new_php_install; then
        install_php_7_4
 fi
 
-cd src
-make -j4
-cd ..
 
 if [ ! -x $PWD/pikrellcam ]
 then
