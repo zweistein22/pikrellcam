@@ -12,6 +12,22 @@ then
     exit 1
 fi
  
+JESSIE=8
+STRETCH=9
+BUSTER=10
+BULLSEYE=11
+V=`cat /etc/debian_version`
+#DEB_VERSION="${V:0:1}"
+# Strip all chars after decimal point
+DEB_VERSION="${V%.*}"
+
+
+if ((DEB_VERSION > BULLSEYE))
+then
+    echo "linux version not supported. Must be 32bit BULLSEYE or less."
+	echo "install failed."
+	exit 1
+fi
 
 # Function to check PHP version
 do_new_php_install() {
@@ -116,12 +132,12 @@ bad_install()
 	exit 1
 	}
 
+sudo apt-get install libasound2-dev alsa-base alsa-utils
+sudo apt-get install libmp3lame-dev
 
-if do_new_php_install; then  
-	   apt-get remove -y --purge nginx*
-       uninstall_php
-       install_php_7_4
-fi
+cd src
+make -j4
+cd ..
 
 
 if [ ! -x $PWD/pikrellcam ]
@@ -219,34 +235,26 @@ echo "Starting PiKrellCam install..."
 
 # =============== apt install needed packages ===============
 #
-JESSIE=8
-STRETCH=9
-BUSTER=10
-BULLSEYE=11
-V=`cat /etc/debian_version`
-#DEB_VERSION="${V:0:1}"
-# Strip all chars after decimal point
-DEB_VERSION="${V%.*}"
 
-PACKAGE_LIST=""
-if ((DEB_VERSION > BULLSEYE))
-then
-    echo "linux version not supported. Must be BULLSEYE or less."
-	echo "install failed."
-	exit 1
 	AV_PACKAGES=""
 	PHP_PACKAGES=""
 
-elif ((DEB_VERSION >= BULLSEYE))
+PACKAGE_LIST=""
+if ((DEB_VERSION >= BULLSEYE))
 then
  echo "BULLSEYE detected."
 	AV_PACKAGES="ffmpeg"
-	PHP_PACKAGES=""
+	PHP_PACKAGES="php php-common php-fpm"
 elif ((DEB_VERSION >= BUSTER))
 then
     echo "BUSTER detected."
 	AV_PACKAGES="ffmpeg"
-	PHP_PACKAGES=""
+	PHP_PACKAGES="php php-common php-fpm"
+#	if do_new_php_install; then  
+#	   apt-get remove -y --purge nginx*
+#       uninstall_php
+#       install_php_7_4
+#     fi
 	
 elif ((DEB_VERSION >= STRETCH))
 then
