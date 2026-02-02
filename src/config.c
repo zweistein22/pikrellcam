@@ -898,7 +898,7 @@ static Config  config[] =
 	{ "# If on, check the media file system as each video is recorded and\n"
 	  "# delete the oldest media to maintain the free percent.\n"
 	  "#",
-	"check_media_diskfree",  "off", FALSE, {.value = &pikrellcam.check_media_diskfree}, config_value_bool_set },
+	"check_media_diskfree",  "on", FALSE, {.value = &pikrellcam.check_media_diskfree}, config_value_bool_set },
 
 	{ "# If on, check the archive file system as each video is archived and\n"
 	  "# delete the oldest archived videos to maintain the free percent.\n"
