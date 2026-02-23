@@ -25,16 +25,23 @@ function dump_log()
 	{
 	global $log_text_color;
 
-	$file = fopen(LOG_FILE, "r");
-	if ($file)
-		{
-		echo "<pre style=\"color:${log_text_color}\">";
-		while (($line = fgets($file, 1024)) !== false)
-			echo "$line";
-		fclose($file);
-		echo "</pre>";
-		}
-	}
+    // Wir holen die letzten 100 Zeilen (-n 100) für den Identifikator 'pikrellcam' (-t)
+    // '2>&1' leitet eventuelle Fehlermeldungen ebenfalls an PHP weiter.
+    $command = "journalctl -t pikrellcam -n 80 --no-pager 2>&1";
+    
+    // exec() oder shell_exec() führen den Systembefehl aus
+    $output = shell_exec($command);
+
+    echo "<pre style=\"color:${log_text_color}; background-color: #1a1a1a; padding: 10px;\">";
+    if ($output) {
+        // htmlspecialchars schützt vor Problemen mit Sonderzeichen im Log
+        echo htmlspecialchars($output);
+    } else {
+        echo "Keine Log-Einträge im Journal gefunden oder Zugriff verweigert.";
+    }
+    echo "</pre>";
+
+}
 ?>
 
 <!DOCTYPE html>

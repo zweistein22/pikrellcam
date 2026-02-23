@@ -665,12 +665,7 @@ if ($servos_enable == "servos_on")
           <a href="help.php"
             class="btn-control" style="margin-left:4px;">Help</a>
 
-          <input id="upgrade_button" type="button" value="Upgrade"
-            style="margin-left:48px;"
-            onclick="fifo_command('upgrade')"
-            class="btn-control"
-          >
-
+         
           <input id="upgrade_button" type="button" value="Reboot"
             style="margin-left:32px;"
             onclick="fifo_command('reboot')"

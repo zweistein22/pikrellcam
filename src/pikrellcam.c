@@ -22,7 +22,7 @@
 #include <signal.h>
 #include <locale.h>
 #include <linux/magic.h>
-
+#include <syslog.h>
 
 PiKrellCam	pikrellcam;
 TimeLapse	time_lapse;
@@ -99,43 +99,43 @@ fname_base(char *path)
 	}
 
 void
-log_printf_no_timestamp(char *fmt, ...)
+vlog_printf(char *fmt, va_list args)
 	{
-	va_list	args;
-	FILE	*f;
+	
+	
 
-	va_start(args, fmt);
-	if (pikrellcam.verbose || pikrellcam.verbose_log)
-		vfprintf(stderr, fmt, args);
-	if ((f = fopen(pikrellcam.log_file, "a")) != NULL)
-		{
-		vfprintf(f, fmt, args);
-		fclose(f);
-		}
-	va_end(args);
+	// 1. Optional: Weiterhin auf stderr ausgeben, falls man pikrellcam manuell startet
+	if (pikrellcam.verbose || pikrellcam.verbose_log) {
+		va_list args_stderr;
+		va_copy(args_stderr, args);
+		vfprintf(stderr, fmt, args_stderr);
+		va_end(args_stderr);
 	}
 
+	// 2. DAS HAUPT-LOG: Direkt ins System-Journal
+	// vsyslog ist extrem effizient
+	vsyslog(LOG_USER | LOG_INFO, fmt, args);
+
+	
+	}
+
+void 
+log_printf_no_timestamp(char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	vlog_printf(fmt, args);
+	va_end(args);
+
+}
 void
 log_printf(char *fmt, ...)
 	{
-	va_list	args;
-	FILE	*f;
-	char	tbuf[32];
-
+	va_list args;
 	va_start(args, fmt);
-	strftime(tbuf, sizeof(tbuf), "%T", localtime(&pikrellcam.t_now));
-	if (pikrellcam.verbose || pikrellcam.verbose_log)
-		{
-		fprintf(stderr, "%s : ", tbuf);
-		vfprintf(stderr, fmt, args);
-		}
-	if ((f = fopen(pikrellcam.log_file, "a")) != NULL)
-		{
-		fprintf(f, "%s : ", tbuf);
-		vfprintf(f, fmt, args);
-		fclose(f);
-		}
+	vlog_printf(fmt, args);
 	va_end(args);
+	
 	}
 
 void
