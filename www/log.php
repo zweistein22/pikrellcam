@@ -31,8 +31,7 @@ function dump_log()
     
     // exec() oder shell_exec() führen den Systembefehl aus
     $output = shell_exec($command);
-
-    echo "<pre style=\"color:${log_text_color}; background-color: #1a1a1a; padding: 10px;\">";
+	echo "<pre style=\"color:${log_text_color}; background-color: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px;\">";
     if ($output) {
         // htmlspecialchars schützt vor Problemen mit Sonderzeichen im Log
         echo htmlspecialchars($output);
@@ -53,8 +52,8 @@ function dump_log()
   </head>
 
   <?php
-  echo "<body onload=\"scroll_to_anchor()\" background=\"$background_image\">";
-    echo "<div>";
+  echo "<body onload=\"scroll_to_anchor()\" style=\"background-image: url('$background_image'); background-size: cover; background-attachment: fixed;\">";
+  echo "<div>";
 //ini_set('display_errors',1);
 //ini_set('display_startup_errors',1);
 //error_reporting(-1);
