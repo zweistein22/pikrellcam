@@ -22,6 +22,7 @@ V=`cat /etc/debian_version`
 DEB_VERSION="${V%.*}"
 
 
+
 if ((DEB_VERSION > BULLSEYE))
 then
     echo "linux version not supported. Must be 32bit BULLSEYE or less."
@@ -57,6 +58,10 @@ do_new_php_install() {
     fi
 }
 
+VSHORT=$PHP_VERSION
+# Strip all chars after decimal point
+SHORT_PHP_VERSION="${VSHORT%.*}"
+
 # Function to uninstall current PHP version
 uninstall_php() {
     echo "Uninstalling current PHP version..."
@@ -66,10 +71,15 @@ uninstall_php() {
 	sudo systemctl stop php-fpm
 	sudo rm /etc/systemd/system/php-fpm.service
 	sudo rm /etc/systemd/system/multi-user.target.wants/php*fpm.service
+	sudo rm /etc/systemd/system/php$SHORT_PHP_VERSION-fpm.service
+	sudo rm /etc/systemd/system/multi-user.target.wants/php$SHORT_PHP_VERSION-fpm.service
 	# Create symlinks for php and php-fpm
     sudo rm /usr/bin/php
     sudo rm /usr/sbin/php-fpm
 }
+
+
+ 
 
 # Function to install PHP 7.4
 install_php_7_4() {
@@ -88,7 +98,10 @@ install_php_7_4() {
         libonig-dev \
         libreadline-dev \
         libfreetype6-dev \
+		libonig-dev \
         libzip-dev \
+		zlib1g-dev \
+		libsystemd-dev \ 
         pkg-config \
         re2c
 
@@ -99,25 +112,53 @@ install_php_7_4() {
     cd php-$NEW_PHP_VERSION
 
     # Configure and install
-    sudo ./configure  --sysconfdir=/etc/php --with-config-file-path=/etc/php --enable-mbstring --with-curl --with-openssl --with-zlib --with-pdo-mysql --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --enable-mbstring --with-readline --with-zip
+    sudo ./configure  --prefix=/usr \
+                      --sysconfdir=/etc/php/7.4/fpm \
+                      --with-config-file-path=/etc/php/7.4/fpm \
+                      --with-config-file-scan-dir=/etc/php/7.4/fpm/conf.d \
+	                  --enable-mbstring \
+					  --enable-opcache \
+					  --mandir=/usr/share/man \
+					  --with-curl \
+					  --with-openssl \
+					  --with-zlib \
+					  --with-pdo-mysql \
+					  --enable-fpm \
+					  --disable-cgi \
+					  --enable-gd \
+					  --with-jpeg \
+					  --enable-xml \
+                      --with-mysqli \
+					  --with-fpm-systemd \
+					  --with-fpm-user=www-data \
+					  --with-fpm-group=www-data \
+					  --with-readline \
+					  --localstatedir=/var \
+					  --with-zip
     make -j$(nproc)
     sudo make install
 
-	 VSHORT=$NEW_PHP_VERSION
-# Strip all chars after decimal point
-    SHORT_PHP_VERSION="${VSHORT%.*}"
+	sudo cp php.ini-production /etc/php/7.4/fpm/php.ini
+    sudo cp /etc/php/7.4/fpm/php-fpm.conf.default /etc/php/7.4/fpm/php-fpm.conf
+
+	sudo cp /etc/php/7.4/fpm/php-fpm.d/www.conf.default /etc/php/7.4/fpm/php-fpm.d/www.conf
+	# replace listen = 127.0.0.1:9000 with listen = /run/php/php7.4-fpm.sock
+	sudo sed -i 's|^listen = 127.0.0.1:9000|listen = /run/php/php7.4-fpm.sock\nlisten.owner = www-data\nlisten.group = www-data\nlisten.mode = 0660|' /etc/php/7.4/fpm/php-fpm.d/www.conf
 	
+	sudo mkdir -p /run/php
+	sudo chown www-data:www-data /run/php
+
     # Set up PHP-FPM as a service
-    sudo cp sapi/fpm/php-fpm.service /etc/systemd/system/php$SHORT_PHP_VERSION-fpm.service
-    sudo systemctl enable phpSHORT_PHP_VERSION-fpm
-    sudo systemctl start phpSHORT_PHP_VERSION-fpm
+    #sudo cp sapi/fpm/php-fpm.service /etc/systemd/system/php$SHORT_PHP_VERSION-fpm.service
+    #sudo systemctl enable php$SHORT_PHP_VERSION-fpm
+    #sudo systemctl start php$SHORT_PHP_VERSION-fpm
 
     # Create symlinks for php and php-fpm
-    sudo ln -s /usr/local/php/bin/php /usr/bin/php
-    sudo ln -s /usr/local/php/sbin/php-fpm /usr/sbin/php-fpm
+    #sudo ln -s /usr/local/php/bin/php /usr/bin/php
+    #sudo ln -s /usr/local/php/sbin/php-fpm /usr/sbin/php-fpm
 	cd ..  # on ~/user/pikrellcam  now
 	rm -rf php-$NEW_PHP_VERSION.tar.gz
-	rm -rf php-$NEW_PHP_VERSION
+	#rm -rf php-$NEW_PHP_VERSION
 
     echo "PHP $NEW_PHP_VERSION installation is complete."
 }
@@ -249,22 +290,16 @@ elif ((DEB_VERSION >= BUSTER))
 then
     echo "BUSTER detected."
 	AV_PACKAGES="ffmpeg"
-	PHP_PACKAGES="php php-common php-fpm"
-#	if do_new_php_install; then  
-#	   apt-get remove -y --purge nginx*
-#       uninstall_php
-#       install_php_7_4
-#     fi
 	
-elif ((DEB_VERSION >= STRETCH))
-then
-	AV_PACKAGES="libav-tools"
-	PHP_PACKAGES="php7.0 php7.0-common php7.0-fpm"
-else
-	AV_PACKAGES="libav-tools"
-	PHP_PACKAGES="php5 php5-common php5-fpm"
+	if do_new_php_install; then  
+	   apt-get remove -y --purge nginx*
+       uninstall_php
+       install_php_7_4
+    else
+		echo "Keeping standard php installation."
+		PHP_PACKAGES="php php-common php-fpm"
+	fi
 fi
-
 for PACKAGE in $PHP_PACKAGES $AV_PACKAGES
 do
 	if ! dpkg -s $PACKAGE 2>/dev/null | grep Status | grep -q installed
@@ -512,8 +547,10 @@ do
 	if [ ! -f ../scripts/$script ] && [ "${script:0:1}" != "_" ]
 	then
 		cp $script ../scripts 
+		chmod +x ../scripts/$script
 	fi
 done
+
 
 echo ""
 echo "Install finished."
