@@ -501,7 +501,7 @@ fi
 sudo service nginx restart
 
 
-echo "# =============== Setup FIFO  ==============="
+# =============== Setup FIFO  ===============
 #
 fifo=$PWD/www/FIFO
 
@@ -512,10 +512,10 @@ then
 fi
 sudo chown $USER.www-data $fifo
 sudo chmod 664 $fifo
+sudo usermod -aG systemd-journal www-data
 
 
-
-echo "# =============== copy scripts-dist into scripts  ==============="
+# =============== copy scripts-dist into scripts  ===============
 
 if [ ! -d scripts ]
 then

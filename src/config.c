@@ -936,7 +936,7 @@ static Config  config[] =
 	  "# pixel size combination also can be a limiting factor on video quality\n"
 	  "# and may limit the benefit of the highest bitrate settings.\n"
 	  "#",
-	"video_bitrate",  "6000000", TRUE, {.value = &pikrellcam.camera_adjust.video_bitrate},    config_value_int_set },
+	"video_bitrate",  "3000000", TRUE, {.value = &pikrellcam.camera_adjust.video_bitrate},    config_value_int_set },
 
 	{ "# Pixel width of the streamed jpeg file /run/pikrellcam/mjpeg.jpg.\n"
 	  "# Aspect ratio is determined by the video resolution setting.\n"
@@ -944,7 +944,7 @@ static Config  config[] =
 	  "# If bandwith is a problem you can reduce mjpeg_quality to 5 without\n"
 	  "# much loss of quality.\n"
 	  "#",
-	"mjpeg_width",    "800",  TRUE, {.value = &pikrellcam.mjpeg_width},      config_value_int_set },
+	"mjpeg_width",    "480",  TRUE, {.value = &pikrellcam.mjpeg_width},      config_value_int_set },
 
 	{ "# Quality factor (up to 100) affects the quality and size of the stream jpeg.\n"
 	  "# Set this lower if you need to reduce the stream bandwidth.  The value\n"
