@@ -73,15 +73,22 @@ uninstall_php() {
 	sudo rm /etc/systemd/system/multi-user.target.wants/php*fpm.service
 	sudo rm /etc/systemd/system/php$SHORT_PHP_VERSION-fpm.service
 	sudo rm /etc/systemd/system/multi-user.target.wants/php$SHORT_PHP_VERSION-fpm.service
+	sudo rm -rf /usr/lib/php
 	# Create symlinks for php and php-fpm
     sudo rm /usr/bin/php
     sudo rm /usr/sbin/php-fpm
+	sudo rm -rf /usr/local/bin/php
+	sudo rm -rf /usr/local/bin/php-cgi
+	sudo rm -rf /usr/local/bin/php-config
+	sudo rm -rf /usr/local/bin/phpdbg
+	sudo rm /usr/local/bin/phar.phar
+	sudo rm -rf /usr/local/bin/phar
+	sudo rm -rf /usr/local/include/php
+	sudo rm -rf /usr/local/lib/php
+	sudo rm -rf /etc/php/7.4/fpm
 }
 
-
- 
-
-# Function to install PHP 7.4
+# Function to install PHP 7.4 from src
 install_php_7_4() {
     sudo apt update
     sudo apt install -y \
@@ -93,9 +100,7 @@ install_php_7_4() {
         libsqlite3-dev \
         libssl-dev \
         libcurl4-openssl-dev \
-        libjpeg-dev \
-        libpng-dev \
-        libonig-dev \
+       	libpng-dev \
         libreadline-dev \
         libfreetype6-dev \
 		libonig-dev \
@@ -122,11 +127,10 @@ install_php_7_4() {
 					  --with-curl \
 					  --with-openssl \
 					  --with-zlib \
+					  --with-iconv \
 					  --with-pdo-mysql \
 					  --enable-fpm \
 					  --disable-cgi \
-					  --enable-gd \
-					  --with-jpeg \
 					  --enable-xml \
                       --with-mysqli \
 					  --with-fpm-systemd \
@@ -149,21 +153,19 @@ install_php_7_4() {
 	sudo chown www-data:www-data /run/php
 
     # Set up PHP-FPM as a service
-    #sudo cp sapi/fpm/php-fpm.service /etc/systemd/system/php$SHORT_PHP_VERSION-fpm.service
-    #sudo systemctl enable php$SHORT_PHP_VERSION-fpm
-    #sudo systemctl start php$SHORT_PHP_VERSION-fpm
+    sudo cp sapi/fpm/php-fpm.service /etc/systemd/system/php$SHORT_PHP_VERSION-fpm.service
+    sudo systemctl enable php$SHORT_PHP_VERSION-fpm
+    sudo systemctl start php$SHORT_PHP_VERSION-fpm
 
     # Create symlinks for php and php-fpm
-    #sudo ln -s /usr/local/php/bin/php /usr/bin/php
-    #sudo ln -s /usr/local/php/sbin/php-fpm /usr/sbin/php-fpm
+    sudo ln -s /usr/local/php/bin/php /usr/bin/php
+    sudo ln -s /usr/local/php/sbin/php-fpm /usr/sbin/php-fpm
 	cd ..  # on ~/user/pikrellcam  now
 	rm -rf php-$NEW_PHP_VERSION.tar.gz
-	#rm -rf php-$NEW_PHP_VERSION
+	rm -rf php-$NEW_PHP_VERSION
 
-    echo "PHP $NEW_PHP_VERSION installation is complete."
+    echo "PHP $NEW_PHP_VERSION installation from src is complete."
 }
-
-
 
 
 bad_install()
@@ -260,16 +262,13 @@ else
 	SET_PASSWORD=yes
 fi
 
-if [ "$SET_PASSWORD" == "yes" ]
+if [ "$SET_PASSWORD" == "yes" ] 
 then
 	echo "Enter a password for a web page login for user: $USER"
 	echo "Enter a blank entry if you do not want the password login."
 	echo -n "Enter password: "
 	read PASSWORD
 fi
-
-
-
 
 echo ""
 echo "Starting PiKrellCam install..."
@@ -283,23 +282,25 @@ echo "Starting PiKrellCam install..."
 PACKAGE_LIST=""
 if ((DEB_VERSION >= BULLSEYE))
 then
- echo "BULLSEYE detected."
+    echo "BULLSEYE detected."
 	AV_PACKAGES="ffmpeg"
 	PHP_PACKAGES="php php-common php-fpm"
+
 elif ((DEB_VERSION >= BUSTER))
 then
     echo "BUSTER detected."
 	AV_PACKAGES="ffmpeg"
-	
-	if do_new_php_install; then  
+	if do_new_php_install;
+	then  
 	   apt-get remove -y --purge nginx*
        uninstall_php
        install_php_7_4
     else
-		echo "Keeping standard php installation."
+		echo "Keeping existing php installation."
 		PHP_PACKAGES="php php-common php-fpm"
 	fi
 fi
+
 for PACKAGE in $PHP_PACKAGES $AV_PACKAGES
 do
 	if ! dpkg -s $PACKAGE 2>/dev/null | grep Status | grep -q installed
@@ -330,16 +331,6 @@ else
 fi
 
 
-if ((DEB_VERSION < JESSIE))
-then
-	if ! dpkg -s realpath 2>/dev/null | grep Status | grep -q installed
-	then
-		echo "Installing package: realpath"
-		sudo apt-get install -y --no-install-recommends realpath
-	fi
-fi
-
-
 if [ ! -h /usr/local/bin/pikrellcam ]
 then
     echo "Making /usr/local/bin/pikrellcam link."
@@ -354,7 +345,6 @@ else
         sudo ln -s $PWD/pikrellcam /usr/local/bin/pikrellcam
     fi
 fi
-
 
 # =============== create initial ~/.pikrellcam configs ===============
 #
@@ -465,12 +455,7 @@ then
 	sudo sed -i  '/access_log/c\	access_log off;' /etc/nginx/nginx.conf
 fi
 
-if ((DEB_VERSION < JESSIE))
-then
-	NGINX_SITE=etc/nginx-wheezy-site-default
-else
-	NGINX_SITE=etc/nginx-jessie-site-default
-fi
+NGINX_SITE=etc/nginx-jessie-site-default
 
 echo "Installing /etc/nginx/sites-available/pikrellcam"
 echo "    nginx web server port: $PORT"
@@ -483,12 +468,9 @@ sudo sed -i "s|PIKRELLCAM_WWW|$PWD/www|; \
 if ((DEB_VERSION >= BUSTER))
 then
 	sudo sed -i "s/php5/php\/php7.4/" /etc/nginx/sites-available/pikrellcam
-elif ((DEB_VERSION >= STRETCH))
-then
-	sudo sed -i "s/php5/php\/php7.0/" /etc/nginx/sites-available/pikrellcam
-fi
 
 NGINX_SITE=/etc/nginx/sites-available/pikrellcam
+fi
 
 if [ "$PORT" == "80" ]
 then
@@ -519,7 +501,7 @@ fi
 sudo service nginx restart
 
 
-# =============== Setup FIFO  ===============
+echo "# =============== Setup FIFO  ==============="
 #
 fifo=$PWD/www/FIFO
 
@@ -533,8 +515,8 @@ sudo chmod 664 $fifo
 
 
 
-# =============== copy scripts-dist into scripts  ===============
-#
+echo "# =============== copy scripts-dist into scripts  ==============="
+
 if [ ! -d scripts ]
 then
 	mkdir scripts
@@ -544,24 +526,27 @@ cd scripts-dist
 
 for script in *
 do
+	chmod +x $script
 	if [ ! -f ../scripts/$script ] && [ "${script:0:1}" != "_" ]
 	then
 		cp $script ../scripts 
-		chmod +x ../scripts/$script
 	fi
 done
 
+cd ..
 
 echo ""
 echo "Install finished."
 echo "This install script does not automatically start pikrellcam."
 echo "To start pikrellcam, open a browser page to:"
+
 if [ "$PORT" == "80" ]
 then
 	echo "    http://your_pi"
 else
 	echo "    http://your_pi:$PORT"
 fi
+
 echo "and click on the \"System\" panel and then the \"Start PiKrellCam\" button."
 echo "PiKrellCam can also be run from a Pi terminal for testing purposes."
 if [ "$AUTOSTART" == "yes" ]
