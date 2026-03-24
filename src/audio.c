@@ -392,6 +392,8 @@ audio_thread(void *ptr)
 				free(pikrellcam.audio_pathname);
 				}
 			pikrellcam.audio_pathname = NULL;
+			// here we brutally restart pikrellcam
+			exit(1);
 			break;
 			}
 

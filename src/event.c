@@ -763,13 +763,13 @@ event_loop_diskusage_percent(void)
 		return;
 		}
 
-	int files_deleted = 0; // Zähler für die Hysterese
+	int files_deleted = 0; // Zï¿½hler fï¿½r die Hysterese
 
 	for (i = 0; i < n; ++i)
 		{
 		if (   used_percent >= pikrellcam.loop_diskusage_percent
 		    || diskfree_low
-			|| (files_deleted > 0 && files_deleted < 25)   /* Hysterese: mindestens 5 Dateien löschen */
+			|| (files_deleted > 5 && files_deleted < 25)   /* Hysterese: mindestens 5 Dateien lï¿½schen */
 		   )
 			{
 			if (pikrellcam.verbose_log)
@@ -791,7 +791,7 @@ event_loop_diskusage_percent(void)
 					used_blocks -= sb.st_blocks;
 				unlink(fname);
 				}
-			files_deleted++; // Hysterese-Zähler erhöhen
+			files_deleted++; // Hysterese-Zï¿½hler erhï¿½hen
 			used_percent = (int) ((100LL * used_blocks) / fs_blocks);
 			diskfree_low = diskfree_is_low(pikrellcam.loop_dir);
 			}
