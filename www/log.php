@@ -25,11 +25,11 @@ function dump_log()
 	{
 	global $log_text_color;
 
-    // Wir holen die letzten 100 Zeilen (-n 100) f�r den Identifikator 'pikrellcam' (-t)
+    // Wir holen die letzten 100 Zeilen (-n 100) für den Identifikator 'pikrellcam' (-t)
     // '2>&1' leitet eventuelle Fehlermeldungen ebenfalls an PHP weiter.
     $command = "journalctl -t pikrellcam -n 80 --no-pager 2>&1";
     
-    // exec() oder shell_exec() f�hren den Systembefehl aus
+    // exec() oder shell_exec() führen den Systembefehl aus
     $output = shell_exec($command);
 	echo "<pre style=\"color:${log_text_color}; background-color: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px;\">";
     if ($output) {
