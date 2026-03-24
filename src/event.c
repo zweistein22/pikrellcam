@@ -769,7 +769,7 @@ event_loop_diskusage_percent(void)
 		{
 		if (   used_percent >= pikrellcam.loop_diskusage_percent
 		    || diskfree_low
-			|| (files_deleted > 5 && files_deleted < 25)   /* Hysterese: mindestens 5 Dateien l�schen */
+			|| (files_deleted > 0 && files_deleted < 25)   /* Hysterese: mindestens 5 Dateien l�schen */
 		   )
 			{
 			if (pikrellcam.verbose_log)
