@@ -763,44 +763,76 @@ event_loop_diskusage_percent(void)
 		return;
 		}
 
-	int files_deleted = 0; // Z�hler f�r die Hysterese
+// ... (dein bestehender Code bis scandir) ...
 
-	for (i = 0; i < n; ++i)
-		{
-		if (   used_percent >= pikrellcam.loop_diskusage_percent
-		    || diskfree_low
-			|| (files_deleted > 5 && files_deleted < 25)   /* Hysterese: mindestens 5 Dateien l�schen */
-		   )
-			{
-			if (pikrellcam.verbose_log)
-				log_printf("loop delete(count %d,%d%% used): %s\n",
-					files_deleted + 1, used_percent, mp4_list[i]->d_name);
+    int files_deleted = 0;
+    // Wir definieren ein Ziel: z.B. 5% unter das Limit kommen
+    int target_percent = pikrellcam.loop_diskusage_percent - 5; 
+    if (target_percent < 0) target_percent = 0;
 
-			snprintf(fname, sizeof(fname), "%s/%s",
-						pikrellcam.loop_video_dir, mp4_list[i]->d_name);
-			if (lstat(fname, &sb) == 0)
-				used_blocks -= sb.st_blocks;
-			unlink(fname);
+    for (i = 0; i < n; ++i)
+    {
+        /* Hysterese-Logik:
+           Lösche, wenn:
+           1. Der Speicherplatz aktuell zu voll ist (Initial-Trigger)
+           ODER
+           2. Wir schon angefangen haben zu löschen, aber noch nicht 5 Dateien erreicht haben
+           ODER
+           3. Wir schon angefangen haben zu löschen, aber das target_percent noch nicht unterschritten ist
+        */
+        if (   used_percent >= pikrellcam.loop_diskusage_percent 
+            || diskfree_low 
+            || (files_deleted > 0 && files_deleted < 5)
+            || (files_deleted > 0 && used_percent > target_percent)
+           )
+        {
+            if (pikrellcam.verbose_log)
+                log_printf("loop delete(count %d, %d%% used, target %d%%): %s\n",
+                    files_deleted + 1, used_percent, target_percent, mp4_list[i]->d_name);
 
-			snprintf(fname, sizeof(fname) - 3, "%s/%s",
-						pikrellcam.loop_thumb_dir, mp4_list[i]->d_name);
-			if ((s = strstr(fname, ".mp4")) != NULL)
-				{
-				strcpy(s, ".th.jpg");
-				if (lstat(fname, &sb) == 0)
-					used_blocks -= sb.st_blocks;
-				unlink(fname);
-				}
-			files_deleted++; // Hysterese-Z�hler erh�hen
-			used_percent = (int) ((100LL * used_blocks) / fs_blocks);
-			diskfree_low = diskfree_is_low(pikrellcam.loop_dir);
-			}
-		
-		free(mp4_list[i]);
-		}
-	if (mp4_list)
-		free(mp4_list);
-	}
+            // --- Löschvorgang MP4 ---
+            snprintf(fname, sizeof(fname), "%s/%s",
+                        pikrellcam.loop_video_dir, mp4_list[i]->d_name);
+            if (lstat(fname, &sb) == 0)
+                used_blocks -= sb.st_blocks;
+            unlink(fname);
+
+            // --- Löschvorgang Thumbnail ---
+            snprintf(fname, sizeof(fname) - 3, "%s/%s",
+                        pikrellcam.loop_thumb_dir, mp4_list[i]->d_name);
+            if ((s = strstr(fname, ".mp4")) != NULL)
+            {
+                strcpy(s, ".th.jpg");
+                if (lstat(fname, &sb) == 0)
+                    used_blocks -= sb.st_blocks;
+                unlink(fname);
+            }
+
+            files_deleted++;
+            
+            // Werte nach jedem Löschen aktualisieren für die nächste Iteration
+            used_percent = (int) ((100LL * used_blocks) / fs_blocks);
+            diskfree_low = diskfree_is_low(pikrellcam.loop_dir);
+        }
+        else if (files_deleted > 0)
+        {
+            // Wenn wir im Cleanup-Modus waren, aber die Bedingungen (Mindestanzahl & Ziel-%) 
+            // jetzt erfüllt sind, können wir die Schleife vorzeitig verlassen.
+            free(mp4_list[i]); // Nicht vergessen, das aktuelle Element noch zu freen
+            i++; 
+            break; 
+        }
+        
+        free(mp4_list[i]);
+    }
+
+    // Restliche mp4_list aufräumen, falls wir per break rausgegangen sind
+    for (; i < n; ++i) {
+        free(mp4_list[i]);
+    }
+    if (mp4_list)
+        free(mp4_list);
+}
 
 void
 log_lines(void)
