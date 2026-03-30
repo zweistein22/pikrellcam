@@ -439,7 +439,7 @@ I420_video_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 								- N_MJPEG_ENCODER_INPUT_BUFFERS;
 					}
 				pthread_mutex_unlock(&mjpeg_encoder_frame_count_lock);
-
+				exit(1);
 				if (pikrellcam.debug)
 					printf("mjpeg encoder stalled (%d) -> skipping preview frame.\n",
 						   pikrellcam.mjpeg_stall_count);
