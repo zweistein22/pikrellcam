@@ -1094,6 +1094,8 @@ pikrellcam_cleanup(void)
 static void
 signal_quit(int sig)
 	{
+	// Wir versuchen noch schnell, die Nachricht ins Log zu schreiben
+    log_printf("Signal %d: forcing shutdown.\n", sig);
 	pikrellcam_cleanup();
 	display_quit();
 	log_printf("quit signal received - exiting!\n");
