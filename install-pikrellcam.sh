@@ -417,6 +417,12 @@ then
 	cp etc/pikrellcam.sudoers /tmp/pikrellcam.sudoers.tmp
 	sed -i "s|pikrellcam|$CMD|" /tmp/pikrellcam.sudoers.tmp
 	sed -i "s/USER/$USER/" /tmp/pikrellcam.sudoers.tmp
+
+	# 2. NEU: Die systemctl Befehle für root (standard) hinzufügen
+    # Wir hängen diese Zeilen einfach an die temporäre Datei an
+    echo "www-data ALL=NOPASSWD: /usr/bin/systemctl start pikrellcam" >> /tmp/pikrellcam.sudoers.tmp
+    echo "www-data ALL=NOPASSWD: /usr/bin/systemctl stop pikrellcam" >> /tmp/pikrellcam.sudoers.tmp
+	echo "www-data ALL=NOPASSWD: /usr/bin/systemctl status pikrellcam" >> /tmp/pikrellcam.sudoers.tmp
 	sudo chown root.root /tmp/pikrellcam.sudoers.tmp
 	sudo chmod 440 /tmp/pikrellcam.sudoers.tmp
 	sudo mv /tmp/pikrellcam.sudoers.tmp /etc/sudoers.d/pikrellcam
