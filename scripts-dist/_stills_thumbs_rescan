@@ -13,6 +13,14 @@
 #   is moved into the archive directory.
 
 
+# Define the tag once
+TAG="pikrellcam"
+
+# Helper function
+log_info() {
+	logger  -t "$TAG"-i -p user.info "$1"
+}
+
 STILLS_DIR=$1
 INSTALL_DIR=$2
 FIFO=$3
@@ -22,8 +30,7 @@ STILLS_FULL_DIR=$INSTALL_DIR/www/$STILLS_DIR
 
 if [ ! -d $STILLS_FULL_DIR ]
 then
-	echo "stills_thumbs_rescan - no stills directory: $STILLS_FULL_DIR" \
-				>> $LOG_FILE
+	log_info "stills_thumbs_rescan - no stills directory: $STILLS_FULL_DIR"
 	exit 1
 fi
 

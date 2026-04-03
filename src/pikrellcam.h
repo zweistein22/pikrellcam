@@ -57,7 +57,7 @@
 
 #include "utils.h"
 
-#define	PIKRELLCAM_VERSION	"4.4.0"
+#define	PIKRELLCAM_VERSION	"4.5.0"
 
 
 //TCP Stream Server

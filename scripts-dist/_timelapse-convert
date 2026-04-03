@@ -38,6 +38,16 @@ LOG_FILE=$4
 COMMAND_FIFO=$5
 FILENAME_FORMAT=$6
 
+# Define the tag once
+TAG="pikrellcam"
+
+# Helper function
+log_info() {
+	logger  -t "$TAG"-i -p user.info "$1"
+}
+
+
+
 BUSTER=10
 V=`cat /etc/debian_version`
 DEB_VERSION="${V%.*}"
@@ -54,7 +64,7 @@ fi
 #
 
 DATE=`date +"%F %T"`
-echo "  $DATE timelapse-convert: converting $FILENAME_FORMAT to $VIDEOFILE_MP4" >> $LOG_FILE
+log_info "  $DATE timelapse-convert: converting $FILENAME_FORMAT to $VIDEOFILE_MP4"
 
 echo "tl_inform_convert start $SERIES" > $COMMAND_FIFO
 
@@ -79,4 +89,5 @@ echo "tl_inform_convert done $SERIES" > $COMMAND_FIFO
 rm tl_${SERIES}_*.jpg
 
 DATE=`date +"%F %T"`
-echo "  $DATE timelapse-convert: $VIDEOFILE_MP4 done" >> $LOG_FILE
+log_info "  $DATE timelapse-convert: $VIDEOFILE_MP4 done"
+

@@ -23,6 +23,9 @@ After=network.target
 
 [Service]
 Environment=RUNNING_UNDER_SYSTEMD=1
+Environment="HOME=$PKC_DIR"
+Environment="USER=$PKC_USER"
+User=$PKC_USER
 WorkingDirectory=$PKC_DIR
 ExecStart=$PKC_DIR/pikrellcam
 #Restart=always

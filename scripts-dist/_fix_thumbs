@@ -10,6 +10,14 @@ ARCHIVE_DIR=$2
 LOG=$3
 TEST=$4
 
+# Define the tag once
+TAG="pikrellcam"
+
+# Helper function
+log_info() {
+	logger  -t "$TAG"-i -p user.info "$1"
+}
+
 #MEDIA_DIRECTORY=/home/pi/pikrellcam/www/media
 #ARCHIVE_DIR=/home/pi/pikrellcam/www/media/archive
 
@@ -54,7 +62,7 @@ function check_thumb
 			then
 				if ! $AV_PGM -i $1 -ss 0 -vframes 1 $TMP_DIR/$THUMB_JPEG
 				then
-					echo "  Failed to extract thumb from video: $1" >> $LOG
+					log_info "  Failed to extract thumb from video: $1"
 					THUMB_FAIL=true
 				fi
 			fi
@@ -62,7 +70,7 @@ function check_thumb
 			then
 				if [ "$PREFIX" == "mot" ]
 				then
-					echo "  Recovering motion thumb: $THUMBS_DIR/$THUMB_JPEG" >> $LOG
+					log_info "  Recovering motion thumb: $THUMBS_DIR/$THUMB_JPEG"
 					if [ "$TEST" != "test" ]
 					then
 						convert -crop 500x500+100+100 -resize 150x150 \
@@ -72,7 +80,7 @@ function check_thumb
 						rm $TMP_DIR/${THUMB_JPEG}.tmp
 					fi
 				else
-					echo "  Generating thumb type $PREFIX: $THUMBS_DIR/$THUMB_JPEG" >> $LOG
+					log_info "  Generating thumb type $PREFIX: $THUMBS_DIR/$THUMB_JPEG"
 					if [ "$TEST" != "test" ]
 					then
 						convert -resize 150 $TMP_DIR/$THUMB_JPEG $THUMBS_DIR/$THUMB_JPEG
@@ -93,7 +101,7 @@ function check_thumb
 		VIDEO=${BASE%.th.jpg}.mp4
 		if [ ! -f $VIDEOS_DIR/$VIDEO ]
 		then
-			echo "  Deleted thumb with no video: $1" >> $LOG
+			log_info "  Deleted thumb with no video: $1"
 			if [ "$TEST" != "test" ]
 			then
 				rm $1
@@ -106,7 +114,7 @@ function check_thumb
 		IMAGE=${BASE%.th.jpg}.jpg
 		if [ ! -f $STILLS_DIR/$IMAGE ]
 		then
-			echo "  Deleted stills thumb with no image: $1" >> $LOG
+			log_info "  Deleted stills thumb with no image: $1"
 			if [ "$TEST" != "test" ]
 			then
 				rm $1
@@ -120,22 +128,22 @@ function check_thumb
 		else
 			VIDEO=${BASE%.h264}.mp4
 		fi
-		echo "  Stray h264: $1  Will retry MP4Box and delete the h264." >> $LOG
+		log_info "  Stray h264: $1  Will retry MP4Box and delete the h264."
 		if [ "$TEST" != "test" ]
 		then
 			MEDIA_DIR=${DIR%%/videos}
 			if MP4Box -add $1 $DIR/$VIDEO
 			then
- 				echo "    MP4Box run success.  Rerun fix_thumbs to generate thumbnails." >> $LOG
+ 				log_info "    MP4Box run success.  Rerun fix_thumbs to generate thumbnails."
 			else
-				echo "    MP4Box failed, video is not recovered." >> $LOG
+				log_info "    MP4Box failed, video is not recovered."
 			fi
 			rm $1
 		fi
 	fi
 	}
 
-echo "fix_thumbs $TEST: checking $MEDIA_DIRECTORY ...(working)..." >> $LOG
+log_info "fix_thumbs $TEST: checking $MEDIA_DIRECTORY ...(working)..."
 cd $MEDIA_DIRECTORY
 find . | while read file; do check_thumb "./$file"; done
 
@@ -144,11 +152,11 @@ MATCH_LEN=`expr match "$ARCHIVE_DIR" "$MEDIA_DIRECTORY"`
 
 if [ $MATCH_LEN -ne $MEDIA_DIR_LEN ]
 then
-	echo "fix_thumbs $TEST: checking $ARCHIVE_DIR" >> $LOG
+	log_info "fix_thumbs $TEST: checking $ARCHIVE_DIR"
 	cd $ARCHIVE_DIR
 	find . | while read file; do check_thumb "./$file"; done
 else
-	echo "fix_thumbs $TEST: Archive directory is under media directory so archive is already checked." >> $LOG
+	log_info "fix_thumbs $TEST: Archive directory is under media directory so archive is already checked."
 fi
 
-echo "fix_thumbs $TEST: DONE!" >> $LOG
+log_info "fix_thumbs $TEST: DONE!"
