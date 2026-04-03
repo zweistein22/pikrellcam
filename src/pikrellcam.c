@@ -26,6 +26,8 @@
 
 PiKrellCam	pikrellcam;
 TimeLapse	time_lapse;
+// for systemd start as root we downprivilege
+struct passwd *pw;
 
 static char	*pgm_name;
 static boolean	quit_flag;
@@ -33,6 +35,8 @@ static boolean	quit_flag;
 static uid_t  user_uid;
 static gid_t  user_gid;
 static char   *homedir;
+
+int log_start(int a,int b,int c){return 0;}
 
   /* Substitute fmt_arg into str to replace a "$V" substitution variable. 
   |  "str" argument must be allocated memory.
@@ -1095,10 +1099,10 @@ static void
 signal_quit(int sig)
 	{
 	// Wir versuchen noch schnell, die Nachricht ins Log zu schreiben
-    log_printf("Signal %d: forcing shutdown.\n", sig);
+    printf("Signal %d: forcing shutdown.\n", sig);
 	pikrellcam_cleanup();
 	display_quit();
-	log_printf("quit signal received - exiting!\n");
+	printf("quit signal received - exiting!\n");
 	exit(0);
 	}
 
@@ -1884,22 +1888,6 @@ make_dir(char *dir)
 	return dir_exists;
 	}
 
-static void
-log_start(boolean start_sep, boolean time, boolean end_sep)
-	{
-	char	buf[100];
-
-	if (start_sep)
-		log_printf_no_timestamp("\n========================================================\n");
-	if (time)
-		{
-		strftime(buf, sizeof(buf), "%F %T", localtime(&pikrellcam.t_now));
-		log_printf_no_timestamp("======= PiKrellCam %s started at %s\n",
-					pikrellcam.version, buf);
-		}
-	if (end_sep)
-		log_printf_no_timestamp("========================================================\n");
-	}
 
 static int
 pi_model(void)
@@ -1921,6 +1909,9 @@ pi_model(void)
 		}
 	return model;
 	}
+
+
+
 
 
 int
@@ -2258,3 +2249,4 @@ main(int argc, char *argv[])
 
 	return 0;
 	}
+

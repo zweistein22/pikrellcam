@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Define the tag once
+TAG="pikrellcam"
+
+# Helper function
+log_info() {
+	logger -t "$TAG" -i -p user.info "$1"
+}
+
 # Startup script to mount usb drives on media_dir or NFS mount on archive_dir
 #
 # This script should be configured in ~/.pikrellcam/pikrellcam.conf:
@@ -56,11 +64,11 @@ fi
 
 if [ "$MOUNT_DISK" == "" ]
 then
-	echo "  MOUNT_DISK is not set." >> $log_file
+	log_info "  MOUNT_DISK is not set."
 else
 	if ! grep -q $MOUNT_DISK /proc/partitions
 	then
-		echo "  Cannot find $MOUNT_DISK to mount on $media_dir" >> $log_file
+		log_info "  Cannot find $MOUNT_DISK to mount on $media_dir"
 		MOUNT_DISK=""
 	fi
 fi
@@ -75,7 +83,7 @@ then
 	then
 		if [ "$curmount_dir" != "$media_dir" ]
 		then
-			echo "  umount $disk_device from $curmount_dir" >> $log_file
+			log_info "  umount $disk_device from $curmount_dir"
 			sudo umount $disk_device
 		fi
 	fi
@@ -87,17 +95,17 @@ then
 		then
 			if sudo mount $disk_device $media_dir
 			then
-				echo "  mounted $disk_device on $media_dir" >> $log_file
+				log_info "  mounted $disk_device on $media_dir"
 			else
-				echo "  mount of $disk_device on $media_dir failed" >> $log_file
+				log_info "  mount of $disk_device on $media_dir failed"
 			fi
 			#
 			# PiKrellCam will make subdirectories and fixup permissions.
 		else
-			echo "  not mounting $disk_device because $media_dir is a tmpfs" >> $log_file
+			log_info "  not mounting $disk_device because $media_dir is a tmpfs"
 		fi
 	else
-		echo "  $media_dir is already mounted." >> $log_file
+		log_info "  $media_dir is already mounted."
 	fi
 fi
 
@@ -105,7 +113,7 @@ fi
 
 if [ "$NFS_ARCHIVE" == "" ]
 then
-	echo "  NFS_ARCHIVE is not set." >> $log_file
+	log_info "  NFS_ARCHIVE is not set."
 fi
 
 if [ "$NFS_ARCHIVE" != "" ]
@@ -116,12 +124,12 @@ then
 
 	if [ "$stale" != "" ]
 	then
-		echo "  NFS archive directory $archive_dir is stale." >> $log_file
-		echo "    Remote NFS server may be down?" >> log_file
-		echo "    To force unmount, run:  sudo umount -f $archive_dir" >> log_file
+		log_info "  NFS archive directory $archive_dir is stale."
+		log_info "    Remote NFS server may be down?"
+		log_info "    To force unmount, run:  sudo umount -f $archive_dir"
 	elif [ "$fs_type" == "nfs" ]
 	then
-		echo "  $archive_dir is already NFS mounted." >> $log_file
+		log_info "  $archive_dir is already NFS mounted."
 	else
 		cp $install_dir/www/images/nfs-mounting.jpg /run/pikrellcam/mjpeg.jpg
 		sudo mount $NFS_ARCHIVE &
@@ -131,10 +139,10 @@ then
 			fs_type=$(stat -f -L -c %T $archive_dir)
 			if [ "$fs_type" == "nfs" ]
 			then
-				echo "  NFS mounted $NFS_ARCHIVE" >> $log_file
+				log_info "  NFS mounted $NFS_ARCHIVE"
 				break;
 			else
-				echo "  NFS mount of $NFS_ARCHIVE slow or failed ..." >> $log_file
+				log_info "  NFS mount of $NFS_ARCHIVE slow or failed ..."
 			fi
 		done
 	fi

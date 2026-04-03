@@ -15,6 +15,15 @@
 #   $Y	 y coordinate of the motion detected area center in the preview jpeg
 # 
 
+# Define the tag once
+TAG="pikrellcam"
+
+# Helper function
+log_info() {
+	logger  -t "$TAG"-i -p user.info "$1"
+}
+
+
 preview_jpeg=$1
 log_file=$2
 thumb_pathname=$3
@@ -54,12 +63,12 @@ fi
 
 if ((w_motion > 0))
 then
-	echo "  convert $preview_jpeg -crop ${w_motion}x${h_motion}+${x0}+${y0} \
-			-resize ${thumb_size}\! $thumb_pathname" >> $log_file
+	log_info "  convert $preview_jpeg -crop ${w_motion}x${h_motion}+${x0}+${y0} \
+			-resize ${thumb_size}\! $thumb_pathname"
 	convert $preview_jpeg -crop ${w_motion}x${h_motion}+${x0}+${y0} \
 			-resize ${thumb_size}\! $thumb_pathname
 else
-	echo "  convert $preview_jpeg -resize ${thumb_size}\! $thumb_pathname" >> $log_file
+	log_info "  convert $preview_jpeg -resize ${thumb_size}\! $thumb_pathname"
 	convert $preview_jpeg -resize ${thumb_size}\! $thumb_pathname
 fi
 

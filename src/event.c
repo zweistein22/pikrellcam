@@ -1280,16 +1280,7 @@ event_process(void)
 		if (day_tick || !sun.initialized)
 			{
 			if (sun.initialized)
-				{
-				char	tbuf[32];
-
-				log_printf_no_timestamp("\n========================================================\n");
-				strftime(tbuf, sizeof(tbuf), "%F", localtime(&pikrellcam.t_now));
-				log_printf_no_timestamp("%s ================== New Day ==================\n", tbuf);
-				log_printf_no_timestamp("========================================================\n");
-
-				strftime(tbuf, sizeof(tbuf), "%F", localtime(&pikrellcam.t_now));
-				}
+				
 			sun_times_init();
 			sun.initialized = TRUE;
 			log_lines();

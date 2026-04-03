@@ -13,6 +13,13 @@
 #   the archive directory archive-dir/yyyy/mm/dd/stills
 # Otherwise, $1 should be a jpg still and it
 #   is moved into the archive directory.
+# Define the tag once
+TAG="pikrellcam"
+
+# Helper function
+log_info() {
+	logger  -t "$TAG"-i -p user.info "$1"
+}
 
 
 DAY_FLAG=$1
@@ -35,7 +42,7 @@ LEN=${#DATE}
 
 if [[ "$LEN" -ne "10" ]]
 then
-	echo "  archive-still bad date string: $DATE" >> $LOG_FILE
+	log_info "  archive-still bad date string: $DATE"
 	exit 1
 fi
 
@@ -71,7 +78,7 @@ create_dir $ARCHIVE_DIR/$YEAR/$MONTH/$DAY
 create_dir $ARCHIVE_STILLS_PATH
 if [ ! -d $ARCHIVE_STILLS_PATH ]
 then
-	echo "  archive-still could not create archive directory: $ARCHIVE_STILLS_PATH" >> $LOG_FILE
+	log_info "  archive-still could not create archive directory: $ARCHIVE_STILLS_PATH"
 	exit 1
 fi
 create_dir $ARCHIVE_THUMBS_PATH
@@ -79,11 +86,11 @@ create_dir $ARCHIVE_THUMBS_PATH
 
 if [ "$DAY_FLAG" == "day" ]
 then
-	echo "  archive-still day $DATE to $ARCHIVE_DIR/$DATE_PATH" >> $LOG_FILE
+	log_info "  archive-still day $DATE to $ARCHIVE_DIR/$DATE_PATH"
 	mv $MEDIA_DIR/stills/*${DATE}*.jpg $ARCHIVE_STILLS_PATH
 	mv $MEDIA_DIR/stills/.thumbs/*${DATE}*.th.jpg $ARCHIVE_THUMBS_PATH
 else
-	echo "  archive-still $STILL to $ARCHIVE_DIR/$DATE_PATH" >> $LOG_FILE
+	log_info "  archive-still $STILL to $ARCHIVE_DIR/$DATE_PATH"
 	mv $MEDIA_DIR/stills/$STILL $ARCHIVE_STILLS_PATH
 	THUMB_JPEG=${STILL%.jpg}.th.jpg
 	mv $MEDIA_DIR/stills/.thumbs/$THUMB_JPEG $ARCHIVE_THUMBS_PATH

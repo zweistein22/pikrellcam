@@ -1273,10 +1273,10 @@ config_set_defaults(char *home_dir)
 	if (!home_dir)
 		home_dir = getpwuid(geteuid())->pw_dir;
 	asprintf(&pikrellcam.config_dir, "%s/%s", home_dir, PIKRELLCAM_CONFIG_DIR);
-	pikrellcam.tmpfs_dir = strdup("/run/pikrellcam");
+    pikrellcam.tmpfs_dir = strdup("/run/pikrellcam");
 	asprintf(&pikrellcam.motion_events_filename,
 				"%s/motion-events", pikrellcam.tmpfs_dir);
-
+   
 	if (make_directory(pikrellcam.config_dir))
 		{
 		asprintf(&pikrellcam.config_file, "%s/%s",

@@ -22,11 +22,11 @@ Description=PiKrellCam Camera Service
 After=network.target
 
 [Service]
-User=$PKC_USER
+Environment=RUNNING_UNDER_SYSTEMD=1
 WorkingDirectory=$PKC_DIR
 ExecStart=$PKC_DIR/pikrellcam
-Restart=always
-RestartSec=10
+#Restart=always
+#RestartSec=10
 # Increase this if your SD card is very slow to release file locks
 TimeoutStopSec=15
 
