@@ -1923,7 +1923,7 @@ main(int argc, char *argv[])
 	char	*line, *eol, buf[4096];
 	int		t_usleep;
 //	struct timeval	tv;
-
+	openlog("pikrellcam", LOG_PID | LOG_CONS, LOG_USER);
 	pgm_name = argv[0];
 	setlocale(LC_TIME, "");
 
@@ -2246,7 +2246,7 @@ main(int argc, char *argv[])
 
 	//close listening socket
 	close (listenfd);  
-
+    closelog();
 	return 0;
 	}
 

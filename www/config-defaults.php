@@ -18,7 +18,7 @@ $n_thumb_scroll_pixels = 770;
 $n_log_scroll_pixels = 770;
 $log_text_color = "black";
 
-$background_image = "images/paper1.png";
+$background_image = "images/shadow.jpg";
 
 $archive_initial_view = "thumbs";
 $archive_thumbs_scrolled = "yes";
