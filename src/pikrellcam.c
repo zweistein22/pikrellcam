@@ -1798,7 +1798,8 @@ check_modes(char *fname, int mode)
 					log_printf_no_timestamp("  check_modes() execing: %s\n", ch_cmd);
 				status = exec_wait(ch_cmd, NULL);
 				if(status) {
-					log_printf("exec_wait(%s) fails rv=%d",ch_cmd,status);}
+					log_printf("exec_wait(%s) fails rv=%d",ch_cmd,status);
+				}
 				}
 
 
@@ -1813,9 +1814,8 @@ check_modes(char *fname, int mode)
 							st.st_mode, ch_cmd);
 				status = exec_wait(ch_cmd, NULL);
 				if(status) {
-					log_printf("exec_wait(%s) fails rv=%d",ch_cmd,status);}
+					log_printf("exec_wait(%s) fails rv=%d",ch_cmd,status);
 				}
-
 				}
 			else if (pikrellcam.verbose)
 				log_printf_no_timestamp("    Access mode %o already OK.\n", mode);
