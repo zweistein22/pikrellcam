@@ -57,7 +57,7 @@
 
 #include "utils.h"
 
-#define	PIKRELLCAM_VERSION	"4.5.0"
+#define	PIKRELLCAM_VERSION	"4.5.1"
 
 
 //TCP Stream Server
@@ -73,7 +73,6 @@ extern int listenfd, connfd, num_sent;
 extern socklen_t clilen;
 extern struct sockaddr_in cliaddr, servaddr;
 extern int h264_conn_status;
-
 
 #ifndef MAX
 #define MAX(a,b)	(((a) > (b)) ? (a) : (b))

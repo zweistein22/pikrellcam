@@ -1732,7 +1732,7 @@ check_modes(char *fname, int mode)
 	char			*skip_fs = NULL;
 	SList			*list;
 	static SList	*fs_warned_list;
-
+    int status  = 0;
 	if (!fname || pikrellcam.verbose)
 		{
 		log_printf_no_timestamp("  check_modes(%s) %o\n",
@@ -1793,11 +1793,15 @@ check_modes(char *fname, int mode)
 				{
 				snprintf(ch_cmd, sizeof(ch_cmd), "sudo chown %s.www-data %s",
 						pikrellcam.effective_user, fname);
+				
 				if (pikrellcam.verbose)
 					log_printf_no_timestamp("  check_modes() execing: %s\n", ch_cmd);
-
-				exec_wait(ch_cmd, NULL);
+				status = exec_wait(ch_cmd, NULL);
+				if(status) {
+					log_printf("exec_wait(%s) fails rv=%d",ch_cmd,status);}
 				}
+
+
 			else if (pikrellcam.verbose)
 				log_printf_no_timestamp("    User and group names already OK.\n");
 
@@ -1807,7 +1811,11 @@ check_modes(char *fname, int mode)
 				if (pikrellcam.verbose)
 					log_printf_no_timestamp("  check_modes() (%o) execing: %s\n",
 							st.st_mode, ch_cmd);
-				exec_wait(ch_cmd, NULL);
+				status = exec_wait(ch_cmd, NULL);
+				if(status) {
+					log_printf("exec_wait(%s) fails rv=%d",ch_cmd,status);}
+				}
+
 				}
 			else if (pikrellcam.verbose)
 				log_printf_no_timestamp("    Access mode %o already OK.\n", mode);
