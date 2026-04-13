@@ -1568,7 +1568,7 @@ Setup->Config->Loop.
 	</li>
 	<p>
 	<li> Web page text colors can be changed.  If the background is changed to a
-	darker image like <span style='font-weight:700'>images/passion.jpg</span> the text
+	darker image like <span style='font-weight:700'>images/shadow.jpg</span> the text
 	colors could be set brighter.  For example, you could try these changes:
 <pre>
 define("DEFAULT_TEXT_COLOR", "#ffffff");
@@ -1577,7 +1577,7 @@ define("MEDIA_TEXT_COLOR", "#0000EE");
 define("MANUAL_VIDEO_TEXT_COLOR", "#085008");
 define("LOG_TEXT_COLOR", "#ffffff");
 
-define("BACKGROUND_IMAGE", "images/passion.jpg");
+define("BACKGROUND_IMAGE", "images/shadow.jpg");
 </pre>
 	</li>
 	<p>
