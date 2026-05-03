@@ -15,17 +15,16 @@
 #   $Y	 y coordinate of the motion detected area center in the preview jpeg
 # 
 
-# Define the tag once
-TAG="pikrellcam"
+# Define the tag for journalctl
+TAG="pikrellcam-thumb"
 
-# Helper function
+# Helper function for system log
 log_info() {
-	logger  -t "$TAG"-i -p user.info "$1"
+    logger -t "$TAG" -p user.info "$1"
 }
 
-
 preview_jpeg=$1
-log_file=$2
+# log_file=$2  <-- Wird nicht mehr aktiv genutzt, da wir logger verwenden
 thumb_pathname=$3
 thumb_size=$4
 w_motion=$5
@@ -33,43 +32,42 @@ h_motion=$6
 xc=$7
 yc=$8
 
+# 1. Ressourcen-Limitierung für ImageMagick (WICHTIG gegen Hänger)
+# Begrenzt convert auf 1 Thread, um Deadlocks zu vermeiden
+export MAGICK_THREAD_LIMIT=1
+
 w_thumb=$(echo $thumb_size | cut -d "x" -f 1)
 h_thumb=$(echo $thumb_size | cut -d "x" -f 2)
 
 if ((w_thumb <=10 || h_thumb <= 10))
 then
-	w_thumb=150
-	h_thumb=150
+    w_thumb=150
+    h_thumb=150
 fi
 
 if ((w_motion * h_thumb / w_thumb < h_motion))
 then
-	w_motion=$((h_motion * w_thumb / h_thumb))
+    w_motion=$((h_motion * w_thumb / h_thumb))
 else
-	h_motion=$((w_motion * h_thumb / w_thumb))
+    h_motion=$((w_motion * h_thumb / w_thumb))
 fi
 
 x0=$((xc - w_motion / 2))
 y0=$((yc - h_motion / 2))
 
-if ((x0 < 0))
-then
-	x0=0
-fi
-if ((y0 < 0))
-then
-	y0=0
-fi
+# Sicherheitsprüfung für Koordinaten
+(( x0 < 0 )) && x0=0
+(( y0 < 0 )) && y0=0
 
 if ((w_motion > 0))
 then
-	log_info "  convert $preview_jpeg -crop ${w_motion}x${h_motion}+${x0}+${y0} \
-			-resize ${thumb_size}\! $thumb_pathname"
-	convert $preview_jpeg -crop ${w_motion}x${h_motion}+${x0}+${y0} \
-			-resize ${thumb_size}\! $thumb_pathname
+    log_info "Erstelle Crop-Thumb: $thumb_pathname"
+    # Nutze 'nice', um dem Video-Encoding den Vorrang zu lassen
+    nice -n 10 convert "$preview_jpeg" -crop "${w_motion}x${h_motion}+${x0}+${y0}" \
+            -resize "${thumb_size}!" "$thumb_pathname"
 else
-	log_info "  convert $preview_jpeg -resize ${thumb_size}\! $thumb_pathname"
-	convert $preview_jpeg -resize ${thumb_size}\! $thumb_pathname
+    log_info "Erstelle Resize-Thumb: $thumb_pathname"
+    nice -n 10 convert "$preview_jpeg" -resize "${thumb_size}!" "$thumb_pathname"
 fi
 
 exit 0

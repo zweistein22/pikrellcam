@@ -21,8 +21,19 @@
 #include "pikrellcam.h"
 #include <sys/wait.h>
 #include <sys/inotify.h>
-
+#include <utime.h>
 #include "sunriset.h"
+
+void update_watchdog_heartbeat(void) {
+    const char *hb_path = "/tmp/pikrellcam.heartbeat";
+    // utime with NULL sets the file access and modification times to current time
+    if (utime(hb_path, NULL) == -1) {
+        // If file doesn't exist, create it
+        FILE *fp = fopen(hb_path, "w");
+        if (fp) fclose(fp);
+    }
+}
+
 
 #define IBUF_LEN (10 * (sizeof(struct inotify_event) + NAME_MAX + 1))
 
@@ -1263,6 +1274,9 @@ event_process(void)
 		hour_tick = (tm_now->tm_hour  != tm_prev.tm_hour)  ? TRUE : FALSE;
 		day_tick =  (tm_now->tm_mday  != tm_prev.tm_mday)  ? TRUE : FALSE;
 
+		if(five_minute_tick){
+              update_watchdog_heartbeat();
+		}
 		if (pikrellcam.preset_state_modified && five_minute_tick)
 			{
 			pikrellcam.preset_state_modified = FALSE;

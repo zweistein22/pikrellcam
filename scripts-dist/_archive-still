@@ -14,13 +14,14 @@
 # Otherwise, $1 should be a jpg still and it
 #   is moved into the archive directory.
 # Define the tag once
-TAG="pikrellcam"
 
-# Helper function
+# Define the tag for journalctl
+TAG="pikrellcam-archive"
+
+# Helper function for system log
 log_info() {
-	logger  -t "$TAG"-i -p user.info "$1"
+	logger -t "$TAG" -p user.info "$1"
 }
-
 
 DAY_FLAG=$1
 STILL=$1
@@ -30,76 +31,74 @@ MEDIA_DIR=$4
 FIFO=$5
 LOG_FILE=$6
 
+# Datums-Logik absichern
 if [ "$DATE" == "yesterday" ]
 then
-	DATE=`date --date="yesterday" +'%F'`
+	DATE=$(date --date="yesterday" +'%F')
 elif [ "$DATE" == "today" ]
 then
-	DATE=`date --date="today" +'%F'`
+	DATE=$(date --date="today" +'%F')
 fi
 
 LEN=${#DATE}
-
 if [[ "$LEN" -ne "10" ]]
 then
-	log_info "  archive-still bad date string: $DATE"
+	log_info "archive-still bad date string: $DATE"
 	exit 1
 fi
 
-# From DATE arg: yyyy-mm-dd, DATE_PATH is: yyyy/mm/dd
-YEAR=`expr substr $DATE 1 4`
-MONTH=`expr substr $DATE 6 2`
-DAY=`expr substr $DATE 9 2`
+# DATE extrahieren
+YEAR=$(echo $DATE | cut -c1-4)
+MONTH=$(echo $DATE | cut -c6-7)
+DAY=$(echo $DATE | cut -c9-10)
 
-DATE_PATH=$YEAR/$MONTH/$DAY
+DATE_PATH="$YEAR/$MONTH/$DAY"
+ARCHIVE_STILLS_PATH="$ARCHIVE_DIR/$DATE_PATH/stills"
+ARCHIVE_THUMBS_PATH="$ARCHIVE_STILLS_PATH/.thumbs"
 
-ARCHIVE_STILLS_PATH=$ARCHIVE_DIR/$DATE_PATH/stills
-ARCHIVE_THUMBS_PATH=$ARCHIVE_STILLS_PATH/.thumbs
-
-YEAR=`expr substr $DATE 1 4`
-MONTH=`expr substr $DATE 6 2`
-DAY=`expr substr $DATE 9 2`
-
-create_dir()
-	{
-	DIR=$1
-	if [ ! -d $DIR ]
+# Verbesserte create_dir Funktion mit Anführungszeichen gegen chmod-Fehler
+create_dir() {
+	local DIR="$1"
+	if [ ! -z "$DIR" ] && [ ! -d "$DIR" ]
 	then
-		mkdir $DIR
-		sudo chown :www-data $DIR
-		sudo chmod 775  $DIR
+		# -p erstellt den gesamten Pfad auf einmal
+		mkdir -p "$DIR"
+		sudo chown :www-data "$DIR"
+		sudo chmod 775 "$DIR"
 	fi
-	}
+}
 
-create_dir $ARCHIVE_DIR/$YEAR
-create_dir $ARCHIVE_DIR/$YEAR/$MONTH
-create_dir $ARCHIVE_DIR/$YEAR/$MONTH/$DAY
+# Verzeichnisstruktur sicher aufbauen
+create_dir "$ARCHIVE_DIR/$YEAR/$MONTH/$DAY"
+create_dir "$ARCHIVE_STILLS_PATH"
 
-create_dir $ARCHIVE_STILLS_PATH
-if [ ! -d $ARCHIVE_STILLS_PATH ]
+if [ ! -d "$ARCHIVE_STILLS_PATH" ]
 then
-	log_info "  archive-still could not create archive directory: $ARCHIVE_STILLS_PATH"
+	log_info "archive-still could not create archive directory: $ARCHIVE_STILLS_PATH"
 	exit 1
 fi
-create_dir $ARCHIVE_THUMBS_PATH
+create_dir "$ARCHIVE_THUMBS_PATH"
 
-
+# Dateien verschieben mit Absicherung gegen Leerzeichen
 if [ "$DAY_FLAG" == "day" ]
 then
-	log_info "  archive-still day $DATE to $ARCHIVE_DIR/$DATE_PATH"
-	mv $MEDIA_DIR/stills/*${DATE}*.jpg $ARCHIVE_STILLS_PATH
-	mv $MEDIA_DIR/stills/.thumbs/*${DATE}*.th.jpg $ARCHIVE_THUMBS_PATH
+	log_info "archive-still day $DATE to $ARCHIVE_DIR/$DATE_PATH"
+	mv "$MEDIA_DIR"/stills/*"${DATE}"*.jpg "$ARCHIVE_STILLS_PATH" 2>/dev/null
+	mv "$MEDIA_DIR"/stills/.thumbs/*"${DATE}"*.th.jpg "$ARCHIVE_THUMBS_PATH" 2>/dev/null
 else
-	log_info "  archive-still $STILL to $ARCHIVE_DIR/$DATE_PATH"
-	mv $MEDIA_DIR/stills/$STILL $ARCHIVE_STILLS_PATH
-	THUMB_JPEG=${STILL%.jpg}.th.jpg
-	mv $MEDIA_DIR/stills/.thumbs/$THUMB_JPEG $ARCHIVE_THUMBS_PATH
+	log_info "archive-still $STILL to $ARCHIVE_DIR/$DATE_PATH"
+	if [ -f "$MEDIA_DIR/stills/$STILL" ]; then
+		mv "$MEDIA_DIR/stills/$STILL" "$ARCHIVE_STILLS_PATH"
+		THUMB_JPEG=${STILL%.jpg}.th.jpg
+		mv "$MEDIA_DIR/stills/.thumbs/$THUMB_JPEG" "$ARCHIVE_THUMBS_PATH" 2>/dev/null
+	fi
 fi
 
-# Cleanup in case no files were moved so archive page won't show dangling links
-#
-find $ARCHIVE_THUMBS_PATH -maxdepth 0 -empty -exec rmdir $ARCHIVE_THUMBS_PATH \;
-find $ARCHIVE_STILLS_PATH -maxdepth 0 -empty -exec rmdir $ARCHIVE_STILLS_PATH \;
+# Cleanup leere Verzeichnisse
+find "$ARCHIVE_THUMBS_PATH" -maxdepth 0 -empty -exec rmdir "$ARCHIVE_THUMBS_PATH" \; 2>/dev/null
+find "$ARCHIVE_STILLS_PATH" -maxdepth 0 -empty -exec rmdir "$ARCHIVE_STILLS_PATH" \; 2>/dev/null
 
-ARCHIVE_DATE_PATH=$ARCHIVE_DIR/$DATE_PATH
-find $ARCHIVE_DATE_PATH -maxdepth 0 -empty -exec rmdir $ARCHIVE_DATE_PATH \;
+ARCHIVE_DATE_PATH="$ARCHIVE_DIR/$DATE_PATH"
+find "$ARCHIVE_DATE_PATH" -maxdepth 0 -empty -exec rmdir "$ARCHIVE_DATE_PATH" \; 2>/dev/null
+
+exit 0

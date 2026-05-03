@@ -877,15 +877,16 @@ video_record_stop(VideoCircularBuffer *vcb)
 					"rm -f %s; "				// rm converting;
 					"%s",						// record_end_cmd or ""
 
-					pikrellcam.verbose ? "" : "-quiet",	// MP4Box
+				//	pikrellcam.verbose ? "" : "-quiet",	// MP4Box
+					pikrellcam.verbose ? "" : "",	// MP4Box ALdebug
 					tmp_dir,
 //					(float) encode_fps,
 //					pikrellcam.video_h264,
 					add_h264 ? add_h264 : "",
 					add_mp3 ? add_mp3 : "",
 					pikrellcam.video_pathname,
-					pikrellcam.verbose ? "" : "2> /dev/null",
-
+					//pikrellcam.verbose ? "2>&1" : "2> /dev/null",
+					pikrellcam.verbose ? "2>&1" : "2>&1",
 					pikrellcam.video_h264,			// rm h264 mp3
 					pikrellcam.audio_pathname ? pikrellcam.audio_pathname : "",
 					converting_file,			// rm
@@ -1934,7 +1935,7 @@ main(int argc, char *argv[])
 	openlog("pikrellcam", LOG_PID | LOG_CONS, LOG_USER);
 	pgm_name = argv[0];
 	setlocale(LC_TIME, "");
-
+	log_printf("pikrellcam main(): %s\n", "init");
 	time(&pikrellcam.t_now);
 
 	for (i = 1; i < argc; )
