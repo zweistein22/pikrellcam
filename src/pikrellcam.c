@@ -23,6 +23,7 @@
 #include <locale.h>
 #include <linux/magic.h>
 #include <syslog.h>
+#include <sys/stat.h>
 
 PiKrellCam	pikrellcam;
 TimeLapse	time_lapse;
@@ -857,8 +858,18 @@ video_record_stop(VideoCircularBuffer *vcb)
 			converting_file = (vcb->state & VCB_STATE_LOOP_RECORD)
 				? pikrellcam.loop_converting : pikrellcam.video_converting;
 
-			if (pikrellcam.audio_pathname)
-				asprintf(&add_mp3, "-add %s", pikrellcam.audio_pathname);
+			if (pikrellcam.audio_pathname){
+					struct stat st;
+    				// Prüfen, ob die Datei existiert und ob sie größer als 0 Bytes ist
+    				if (stat(pikrellcam.audio_pathname, &st) == 0 && st.st_size > 0) {
+        				asprintf(&add_mp3, "-add %s", pikrellcam.audio_pathname);
+    				} else {
+        			// Falls Datei leer oder nicht lesbar, Pointer auf NULL setzen
+        			// oder eine Warnung ins Log schreiben
+        				add_mp3 = NULL;
+        		 		log_info("Audio file %s is empty or missing, skipping.", pikrellcam.audio_pathname);
+					}
+			}
 
 			if (   (vcb->state & VCB_STATE_MANUAL_RECORD)
 			    || (vcb->state & VCB_STATE_LOOP_RECORD)
