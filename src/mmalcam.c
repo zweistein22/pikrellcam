@@ -45,6 +45,8 @@ static unsigned int		mjpeg_encoder_send_frame,
 static pthread_t	video_write_thread_ref;
 static int			thread_ret = 1;
 
+static int heartbeat_seconds = 15;
+static int heartbeat_count = 0;
   /* TODO: handle annotateV3
   */
 static void
@@ -53,14 +55,19 @@ annotate_text_update(time_t t_annotate)
 	SList           *list;
 	AnnotateString  *annotate;
 	char            buf[MMAL_CAMERA_ANNOTATE_MAX_TEXT_LEN_V3];
-	char            *s;
-	int				R, G, B;
+	char            *s;	int				R, G, B;
 	MMAL_PARAMETER_CAMERA_ANNOTATE_V3_T	mmal_annotate =
 	 		{{
 			MMAL_PARAMETER_ANNOTATE,
 			sizeof(MMAL_PARAMETER_CAMERA_ANNOTATE_V3_T)
 			}};
 
+	if (++heartbeat_count >= heartbeat_seconds) 
+	{
+    	update_watchdog_heartbeat();
+    	heartbeat_count = 0; // Reset safely
+	}
+	
 	if (!pikrellcam.annotate_enable)
 		return;
 	buf[0] = '\0';

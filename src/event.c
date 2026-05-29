@@ -23,8 +23,10 @@
 #include <sys/inotify.h>
 #include <utime.h>
 #include "sunriset.h"
+#include <systemd/sd-daemon.h>
 
 void update_watchdog_heartbeat(void) {
+	/*
     const char *hb_path = "/tmp/pikrellcam.heartbeat";
     // utime with NULL sets the file access and modification times to current time
     if (utime(hb_path, NULL) == -1) {
@@ -32,6 +34,9 @@ void update_watchdog_heartbeat(void) {
         FILE *fp = fopen(hb_path, "w");
         if (fp) fclose(fp);
     }
+		*/
+	// Notify systemd that the service is still alive
+	sd_notify(0, "WATCHDOG=1");	
 }
 
 
@@ -1141,6 +1146,14 @@ sun_times_init(void)
 
 static char *weekdays = "SunMonTueWedThuFriSatSun";
 
+
+int fifteen_seconds_tick(void)
+	{
+	return (pikrellcam.tm_local.tm_sec % 15) == 0;
+	}
+	
+	
+
 void
 event_process(void)
 	{
@@ -1160,6 +1173,16 @@ event_process(void)
 
 	pikrellcam.second_tick = (pikrellcam.t_now == t_prev) ? FALSE : TRUE;
 	t_prev = pikrellcam.t_now;
+
+	if(fifteen_seconds_tick()){
+		MotionFrame			*mf = &motion_frame;
+		if(mf!=NULL && !mf->motion_enable){
+			/* If motion is disabled, we want to make sure the watchdog heartbeat is updated so that the system doesn't reboot due to inactivity. */	
+				update_watchdog_heartbeat();
+		}
+		// if motion is enabled, check is done in display
+		}
+		
 
 	if (pikrellcam.config_media_sequence_modified)
 		config_media_sequence_save();
@@ -1274,9 +1297,7 @@ event_process(void)
 		hour_tick = (tm_now->tm_hour  != tm_prev.tm_hour)  ? TRUE : FALSE;
 		day_tick =  (tm_now->tm_mday  != tm_prev.tm_mday)  ? TRUE : FALSE;
 
-		if(five_minute_tick){
-              update_watchdog_heartbeat();
-		}
+	
 		if (pikrellcam.preset_state_modified && five_minute_tick)
 			{
 			pikrellcam.preset_state_modified = FALSE;

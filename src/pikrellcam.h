@@ -59,6 +59,7 @@
 
 #define	PIKRELLCAM_VERSION	"4.5.1"
 
+void update_watchdog_heartbeat(void);
 
 //TCP Stream Server
 #include <sys/socket.h>

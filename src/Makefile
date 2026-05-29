@@ -21,7 +21,7 @@ MMAL_LIB ?= -L/opt/vc/lib -lbcm_host -lvcos -lmmal -lmmal_core -lmmal_util \
 
 
 FLAGS = -O2 -Wall $(MMAL_INCLUDE) $(INCLUDES)
-LIBS = $(MMAL_LIB) -lm -lpthread -lasound -lmp3lame
+LIBS = $(MMAL_LIB) -lm -lpthread -lasound -lmp3lame -lsystemd
 
 LOCAL_SRC = pikrellcam.c mmalcam.c motion.c event.c display.c config.c \
 			servo.c preset.c sunriset.c multicast.c audio.c \

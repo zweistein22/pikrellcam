@@ -24,7 +24,7 @@
 #include <linux/magic.h>
 #include <syslog.h>
 #include <sys/stat.h>
-
+#include <systemd/sd-daemon.h>
 PiKrellCam	pikrellcam;
 TimeLapse	time_lapse;
 // for systemd start as root we downprivilege
@@ -867,7 +867,7 @@ video_record_stop(VideoCircularBuffer *vcb)
         			// Falls Datei leer oder nicht lesbar, Pointer auf NULL setzen
         			// oder eine Warnung ins Log schreiben
         				add_mp3 = NULL;
-        		 		log_info("Audio file %s is empty or missing, skipping.", pikrellcam.audio_pathname);
+        		 		log_printf("Audio file %s is empty or missing, skipping.", pikrellcam.audio_pathname);
 					}
 			}
 
@@ -2217,6 +2217,8 @@ main(int argc, char *argv[])
 	setup_h264_tcp_server();
 	setup_mjpeg_tcp_server();
 	multicast_init();
+	
+	sd_notify(0, "READY=1");
 
 	start_video_thread();
 
