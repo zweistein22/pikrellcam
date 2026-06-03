@@ -3,28 +3,18 @@
 # Generate a jpeg of the motion area in the motion preview jpeg
 # and store it in the media_dir/thumbs directory.
 # Substitute ".th.jpg" for ".jpg" in the PREVIEW_JPEG name.
-#
-# Argument substitution done by PiKrellCam before running this script:
-#   $F - the preview jpeg filename full path (from MJPEG_DIR)
-#   $G - log file configured in ~/.pikrellcam/pikrellcam.conf.
-#   $A - the thumb pathname in media_dir or loop_dir
-#   thumb_size
-#   $i	 width of the motion detected area in the preview jpeg
-#   $J	 height of the motion detected area in the preview jpeg
-#   $K	 x coordinate of the motion detected area center in the preview jpeg
-#   $Y	 y coordinate of the motion detected area center in the preview jpeg
-# 
 
-# Define the tag for journalctl
 TAG="pikrellcam-thumb"
 
-# Helper function for system log
 log_info() {
     logger -t "$TAG" -p user.info "$1"
 }
 
+log_warn() {
+    logger -t "$TAG" -p user.warn "$1"
+}
+
 preview_jpeg=$1
-# log_file=$2  <-- Wird nicht mehr aktiv genutzt, da wir logger verwenden
 thumb_pathname=$3
 thumb_size=$4
 w_motion=$5
@@ -32,14 +22,31 @@ h_motion=$6
 xc=$7
 yc=$8
 
-# 1. Ressourcen-Limitierung für ImageMagick (WICHTIG gegen Hänger)
-# Begrenzt convert auf 1 Thread, um Deadlocks zu vermeiden
+# --- HARDWARE- & PROZESS-SCHUTZ (ERWEITERT) ---
 export MAGICK_THREAD_LIMIT=1
+# Begrenzt die maximale Zeit, die ImageMagick für die Ausführung haben darf (in Sekunden)
+export MAGICK_TIME_LIMIT=4
+# Begrenzt den Speicher, den ImageMagick allokieren darf (verhindert RAM-Spitzen)
+export MAGICK_AREA_LIMIT=10MB
+export MAGICK_MEMORY_LIMIT=16MiB
+
+# 1. Sicherheitscheck: Existiert die Datei und ist sie fertig geschrieben?
+# Wir warten maximal 3 Versuche (à 0.1s), falls das OS beim Schreiben hinterherhinkt.
+retry=0
+while [ ! -s "$preview_jpeg" ] && [ $retry -lt 3 ]; do
+    sleep 0.1
+    retry=$((retry + 1))
+done
+
+if [ ! -s "$preview_jpeg" ]; then
+    log_warn "Fehler: Quell-JPEG $preview_jpeg existiert nicht oder ist leer! Abruch."
+    exit 1
+fi
 
 w_thumb=$(echo $thumb_size | cut -d "x" -f 1)
 h_thumb=$(echo $thumb_size | cut -d "x" -f 2)
 
-if ((w_thumb <=10 || h_thumb <= 10))
+if ((w_thumb <= 10 || h_thumb <= 10))
 then
     w_thumb=150
     h_thumb=150
@@ -55,19 +62,28 @@ fi
 x0=$((xc - w_motion / 2))
 y0=$((yc - h_motion / 2))
 
-# Sicherheitsprüfung für Koordinaten
 (( x0 < 0 )) && x0=0
 (( y0 < 0 )) && y0=0
 
+# Verzeichnis für das Thumbnail erstellen, falls es fehlt
+mkdir -p "$(dirname "$thumb_pathname")"
+
+# 2. Ausführung mit 'timeout' absichern
+# Falls 'nice convert' trotz Limits blockiert, killt das OS den Befehl nach 5 Sekunden.
 if ((w_motion > 0))
 then
     log_info "Erstelle Crop-Thumb: $thumb_pathname"
-    # Nutze 'nice', um dem Video-Encoding den Vorrang zu lassen
-    nice -n 10 convert "$preview_jpeg" -crop "${w_motion}x${h_motion}+${x0}+${y0}" \
+    timeout 5s nice -n 15 convert "$preview_jpeg" -crop "${w_motion}x${h_motion}+${x0}+${y0}" \
             -resize "${thumb_size}!" "$thumb_pathname"
 else
     log_info "Erstelle Resize-Thumb: $thumb_pathname"
-    nice -n 10 convert "$preview_jpeg" -resize "${thumb_size}!" "$thumb_pathname"
+    timeout 5s nice -n 15 convert "$preview_jpeg" -resize "${thumb_size}!" "$thumb_pathname"
+fi
+
+# Prüfen, ob convert erfolgreich war oder per Timeout gekillt wurde
+if [ $? -eq 124 ]; then
+    log_warn "WARNUNG: 'convert' ist in ein Timeout gelaufen und wurde gekillt!"
+    exit 1
 fi
 
 exit 0

@@ -1119,7 +1119,7 @@ static Config  config[] =
 
 	{ "# Audio rate for a Pi model 1 (armv6 single core Pi1).\n"
 	  "#",
-	"audio_rate_Pi1", "24000", FALSE, {.value = &pikrellcam.audio_rate_Pi1}, config_value_int_set },
+	"audio_rate_Pi1", "48000", FALSE, {.value = &pikrellcam.audio_rate_Pi1}, config_value_int_set },
 
 	{ "# Audio channels.  A USB sound card probably supports only mono and\n"
 	  "# setting 2 channels for this case would be reverted to 1 when the\n"
