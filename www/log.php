@@ -27,7 +27,7 @@ function dump_log()
 
     // Wir holen die letzten 100 Zeilen (-n 120) für den Identifikator 'pikrellcam' (-t)
     // '2>&1' leitet eventuelle Fehlermeldungen ebenfalls an PHP weiter.
-    $command = "journalctl -t pikrellcam -t pikrellcam-thumb -n 500 --no-pager 2>&1";
+    $command = "journalctl --no-pager  -t pikrellcam -t pikrellcam-thumb -n 500 2>&1";
     
     // exec() oder shell_exec() führen den Systembefehl aus
     $output = shell_exec($command);

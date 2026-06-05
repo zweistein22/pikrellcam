@@ -47,6 +47,8 @@ echo "Loading and enabling service..."
 sudo systemctl daemon-reload
 sudo systemctl enable pikrellcam.service
 
+sudo usermod -aG systemd-journal "$PKC_CUSER"
+
 # 4. Final instructions
 echo "------------------------------------------------"
 echo "Done! PiKrellCam is now managed by systemd."

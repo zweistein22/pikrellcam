@@ -57,7 +57,7 @@
 
 #include "utils.h"
 
-#define	PIKRELLCAM_VERSION	"4.5.1"
+#define	PIKRELLCAM_VERSION	"4.5.2"
 
 void update_watchdog_heartbeat(void);
 
