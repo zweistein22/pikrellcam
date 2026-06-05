@@ -311,7 +311,7 @@ done
 
 for PACKAGE in gpac nginx bc \
 	sshpass mpack imagemagick apache2-utils libasound2 libasound2-dev \
-	libmp3lame0 libmp3lame-dev
+	libmp3lame0 libmp3lame-dev libsystemd-dev
 do
 	if ! dpkg -s $PACKAGE 2>/dev/null | grep Status | grep -q installed
 	then
