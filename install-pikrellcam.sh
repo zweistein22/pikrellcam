@@ -188,6 +188,8 @@ then
 	bad_install "program pikrellcam"
 fi
 
+sudo chmod +x $PWD/setup-service.sh
+	
 if [ ! -d $PWD/www ]
 then
 	bad_install "directory www"
@@ -428,6 +430,7 @@ then
 	sudo chown root.root /tmp/pikrellcam.sudoers.tmp
 	sudo chmod 440 /tmp/pikrellcam.sudoers.tmp
 	sudo mv /tmp/pikrellcam.sudoers.tmp /etc/sudoers.d/pikrellcam
+
 #	sudo cat /etc/sudoers.d/pikrellcam
 fi
 
