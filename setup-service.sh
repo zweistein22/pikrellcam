@@ -31,13 +31,12 @@ ExecStart=$PKC_DIR/pikrellcam
 Restart=always
 RestartSec=10
 # Increase this if your SD card is very slow to release file locks
-TimeoutStopSec=15
+TimeoutStopSec=20
 KillMode=mixed
 SendSIGKILL=yes
-TimeoutStopSec=5s
 # Verhindert, dass der Watchdog-Prozess von systemd den Service blockiert
-WatchdogSec=30s
-#FailureAction=reboot
+WatchdogSec=45s
+FailureAction=reboot
 RebootArgument=watchdog-timeout
 [Install]
 WantedBy=multi-user.target
