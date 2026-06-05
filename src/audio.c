@@ -357,6 +357,8 @@ audio_stream_close(int error)
 		log_printf("audio stream closed, error: %s\n", strerror(error));
 	}
 
+
+int disconnect_log_count = 0;
 static void *
 audio_thread(void *ptr)
 	{
@@ -365,18 +367,60 @@ audio_thread(void *ptr)
 	int						n, err, end_frames, t_usec, frames, rhead,
 							n_frames, avail_record_frames, use_record_head;
 	int16_t					*buf = acb->buffer;
+while (1)
+        {
+        err = 0;
+        frames = snd_pcm_readi(acb->pcm, buf, acb->period_frames);
 
-	while (1)
-		{
-		err = 0;
-		if ((frames = snd_pcm_readi(acb->pcm, buf, acb->period_frames)) < 0)
-			{
-			usleep(5000);
-			if (frames == -EAGAIN)
-				continue;
-			if ((err = snd_pcm_recover(acb->pcm, frames, 1)) == 0)
-				err = snd_pcm_start(acb->pcm);
-			}
+        // =================================================================
+        // ERWEITERT: Fehlerbehandlung für USB-Reset und dessen Folgefehler
+        // =================================================================
+        if (frames < 0 || disconnect_log_count > 0)
+            {
+            // Fall A: Der allererste Verbindungsabbruch (-ENODEV)
+            if (frames == -ENODEV || frames == -EBADFD)
+                {
+                if (disconnect_log_count == 0 || disconnect_log_count % 50 == 0)
+                    {
+                    log_printf("Audio WARNING: USB device reset active. Feeding silence... (Loop: %d, Err: %d)\n", 
+                               disconnect_log_count, (int)frames);
+                    }
+                disconnect_log_count++;
+                }
+            // Fall B: Die Schleife läuft weiter, während USB noch weg ist (Folgefehler abfangen)
+            else if (disconnect_log_count > 0)
+                {
+                disconnect_log_count++;
+                // Wenn wir Glück haben, liefert ALSA plötzlich wieder positive Frames (Gerät ist zurück!)
+                if (frames > 0) 
+                    {
+                    log_printf("Audio SUCCESS: USB device recovered after %d loops!\n", disconnect_log_count);
+                    disconnect_log_count = 0; // Reset! Zurück zum Normalbetrieb
+                    goto process_audio;       // Direkt zur normalen Verarbeitung springen
+                    }
+                }
+            else
+                {
+                // Das ist ein normaler Fehler (z.B. XRUN / -EPIPE), kein USB-Ausfall
+                usleep(5000);
+                if (frames == -EAGAIN)
+                    continue;
+                if ((err = snd_pcm_recover(acb->pcm, frames, 1)) == 0)
+                    err = snd_pcm_start(acb->pcm);
+                }
+
+            // Wenn wir uns im USB-Reset-Modus befinden, fäschen wir den Erfolg:
+            if (disconnect_log_count > 0)
+                {
+                memset(buf, 0, acb->period_frames * acb->channels * sizeof(int16_t));
+                frames = acb->period_frames;
+                err = 0; // Verhindert den Einstieg in den "Audio recover failed" Block unten
+                usleep(30000); 
+                }
+            }
+
+        // Der originale Fehlerblock (wird jetzt komplett ignoriert, solange disconnect_log_count > 0)
+	
 		if (err < 0)
 			{
 			log_printf("Audio recover failed: %s\n", snd_strerror(err));
@@ -393,13 +437,23 @@ audio_thread(void *ptr)
 				}
 			pikrellcam.audio_pathname = NULL;
 			// here we brutally restart pikrellcam
-			exit(1);
+			//exit(1);
+			// not needed, as display.c thread hangs then an watchdog updates are missed, which triggers a restart of pikrellcam
 			break;
 			}
 
-		if (frames <= 0)
-			continue;
+if (frames <= 0)
+            continue;
 
+    // Ein Label, falls das Gerät mitten im Loop genau jetzt wieder aufwacht
+    process_audio:
+
+	   if (disconnect_log_count == 0)
+            {
+            // Nichts zu tun, alles läuft super
+            }
+		
+		
 		audio_gain(acb, buf, frames);
 
 		end_frames = acb->n_frames - acb->head;
