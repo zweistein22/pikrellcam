@@ -425,7 +425,6 @@ then
     echo "www-data ALL=NOPASSWD: /usr/bin/systemctl start pikrellcam" >> /tmp/pikrellcam.sudoers.tmp
     echo "www-data ALL=NOPASSWD: /usr/bin/systemctl stop pikrellcam" >> /tmp/pikrellcam.sudoers.tmp
 	echo "www-data ALL=NOPASSWD: /usr/bin/systemctl status pikrellcam" >> /tmp/pikrellcam.sudoers.tmp
-	echo "www-data ALL=NOPASSWD: /usr/bin/journalctl --no-pager" >> /tmp/pikrellcam.sudoers.tmp
 	echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/chown, /usr/bin/chmod, $CMD" >> /tmp/pikrellcam.sudoers.tmp
 	sudo chown root.root /tmp/pikrellcam.sudoers.tmp
 	sudo chmod 440 /tmp/pikrellcam.sudoers.tmp
