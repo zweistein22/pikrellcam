@@ -175,8 +175,8 @@ bad_install()
 	exit 1
 	}
 
-sudo apt-get install libasound2-dev alsa-base alsa-utils
-sudo apt-get install libmp3lame-dev
+sudo apt-get install libasound2-dev alsa-base alsa-utils libsystemd-dev -y
+sudo apt-get install libmp3lame-dev -y
 
 cd src
 make -j4
