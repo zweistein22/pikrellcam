@@ -358,8 +358,6 @@ audio_stream_close(int error)
 	}
 
 
-int disconnect_log_count = 0;
-
 
 static void *
 audio_thread(void *ptr)
