@@ -91,7 +91,7 @@ uninstall_php() {
 # Function to install PHP 7.4 from src
 install_php_7_4() {
     sudo apt update
-    sudo apt install -y \
+    sudo apt install -o Acquire::ForceIPv4=true -y \
         autoconf \
         bison \
         build-essential \
@@ -327,7 +327,7 @@ then
 	echo "Installing packages: $PACKAGE_LIST"
 	echo "Running: apt-get update"
 	sudo apt-get update
-	sudo apt-get install -y --no-install-recommends $PACKAGE_LIST
+	sudo apt-get install -o Acquire::ForceIPv4=true -y --no-install-recommends $PACKAGE_LIST
 else
 	echo "No packages need to be installed."
 fi
