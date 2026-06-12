@@ -376,92 +376,39 @@ audio_thread(void *ptr)
     while (1)
     {
         err = 0;
-        frames = snd_pcm_readi(acb->pcm, buf, acb->period_frames);
+       if ((frames = snd_pcm_readi(acb->pcm, buf, acb->period_frames)) < 0)
+			{
+			usleep(5000);
+			if (frames == -EAGAIN)
+				continue;
+			if ((err = snd_pcm_recover(acb->pcm, frames, 1)) == 0)
+				err = snd_pcm_start(acb->pcm);
+			}
+		if (err < 0)
+			{
+			log_printf("Audio recover failed: %s\n", snd_strerror(err));
+			pthread_mutex_lock(&acb->mutex);
+			snd_pcm_close(acb->pcm);
+			acb->pcm = NULL;
+			pthread_mutex_unlock(&acb->mutex);
+			audio_record_files_close();
+			audio_stream_close(0);
+			if (pikrellcam.audio_pathname)
+				{
+				unlink(pikrellcam.audio_pathname);
+				free(pikrellcam.audio_pathname);
+				}
+			pikrellcam.audio_pathname = NULL;
+			// here we brutally restart pikrellcam
+			exit(1);
+			break;
+			}
+
+		if (frames <= 0)
+			continue;
 
 
-		// =================================================================
-        // USB-Fehler (-19 / -ENODEV) und Folgefehler (-77 / -EBADFD) abfangen
-        // =================================================================
-        if (frames < 0 || disconnect_log_count > 0)
-        {
-            if (frames == -ENODEV || frames == -EBADFD || frames == -77 || frames == -19)
-            {
-                if (disconnect_log_count == 0 || disconnect_log_count % 50 == 0)
-                {
-                    log_printf("Audio WARNING: USB device reset active. Supplying sync-silence... (Loop: %d, Err: %d)\n", 
-                               disconnect_log_count, (int)frames);
-                }
-                disconnect_log_count++;
-                
-                // Alle 150 Loops (~3 Sek) versuchen wir das Handle im Hintergrund zu heilen
-                if (disconnect_log_count % 150 == 0)
-                {
-                    if (acb->pcm) {
-                        snd_pcm_close(acb->pcm);
-                        acb->pcm = NULL;
-                    }
-                    if (snd_pcm_open(&acb->pcm, "default", SND_PCM_STREAM_CAPTURE, SND_PCM_NONBLOCK) == 0) {
-                        snd_pcm_prepare(acb->pcm);
-                    }
-                }
-            }
-            else if (frames > 0 && disconnect_log_count > 0)
-            {
-                log_printf("Audio SUCCESS: USB device recovered after %d loops!\n", disconnect_log_count);
-                disconnect_log_count = 0;
-                // Bei Erfolg laufen wir einfach normal weiter in den Originalcode
-            }
-
-            // Wenn wir uns im Fehlermodus befinden, simulieren wir die Hardware
-            if (disconnect_log_count > 0)
-            {
-                // 1. Den sicheren Staging-Puffer 'buf' mit absolutem Nullsignal (Stille) füllen
-                memset(buf, 0, acb->period_frames * acb->channels * sizeof(int16_t));
-                
-                // 2. Dem nachfolgenden Code vorgaukeln, wir hätten 1024 saubere Frames gelesen
-                frames = acb->period_frames;
-                err = 0; 
-
-                // 3. MATHE-TIMING FÜR 48kHz: 1024 / 48000 = 21.333ms
-                // Das hält den CPU-Load auf absolutem Minimum (unter 3%)!
-                usleep(21333); 
-                
-                // KEIN 'continue'! Wir lassen den Code direkt nach unten in 'process_audio'
-                // laufen. Dort kopiert PiKrellCam die Stille in den Ringpuffer und 
-                // bedient den Muxer/Encoder. Kein Deadlock möglich!
-            }
-        }
-
-
-     
-
-        // Der originale Fehlerblock (wird jetzt bei USB-Ausfall übersprungen, da err = 0)
-        if (err < 0)
-        {
-            log_printf("Audio recover failed: %s\n", snd_strerror(err));
-            pthread_mutex_lock(&acb->mutex);
-            snd_pcm_close(acb->pcm);
-            acb->pcm = NULL;
-            pthread_mutex_unlock(&acb->mutex);
-            audio_record_files_close();
-            audio_stream_close(0);
-            if (pikrellcam.audio_pathname)
-            {
-                unlink(pikrellcam.audio_pathname);
-                free(pikrellcam.audio_pathname);
-            }
-            pikrellcam.audio_pathname = NULL;
-            break; 
-        }
-
-        if (frames <= 0)
-            continue;
-
-    process_audio:
-        // Wenn wir hier im Normalbetrieb ankommen, Zähler zurücksetzen
-        if (disconnect_log_count == 0) {
-            // Normaler Ablauf
-        }
+		
 
         audio_gain(acb, buf, frames);
         
