@@ -368,10 +368,7 @@ audio_thread(void *ptr)
                              n_frames, avail_record_frames, use_record_head;
     int16_t                 *buf = acb->buffer;
     
-    // UNSER NEUER ZÄHLER (muss ganz oben stehen)
-    int disconnect_log_count = 0; 
-
-    while (1)
+     while (1)
     {
         err = 0;
        if ((frames = snd_pcm_readi(acb->pcm, buf, acb->period_frames)) < 0)
